@@ -1,0 +1,24 @@
+<svg width="48" height="48" version="1.1"
+     xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+
+  <path fill="black"
+        d="M 26  0
+           L  2 24
+           L 26 48
+           V 31
+           H 46
+           V 17
+           H 26
+           Z
+
+           M 23  7
+           V 20
+           H 43
+           V 28
+           H 23
+           V 41
+           L  6 24
+           Z
+
+          "/>
+</svg>

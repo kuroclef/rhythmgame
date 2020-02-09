@@ -1,0 +1,62 @@
+<svg width="80" height="48" version="1.1"
+     xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+
+  <path fill="black"
+        d="M 26  0
+           L  6 20
+           L  8 22
+           L 28  2
+           Z
+
+           M 30  2
+           V 22
+           H 50
+           V  2
+           Z
+
+           M 54  0
+           L 52  2
+           L 72 22
+           L 74 20
+           Z
+
+           M  6 24
+           Q -6 36  6 48
+           L  8 46
+           Q -3 36  8 26
+           Z
+
+           M 22 24
+           L 19 29
+           H 21
+           L 26 24
+           Z
+
+           M 33 26
+           H 30
+           L 40 48
+           L 50 26
+           H 47
+           L 40 42
+           Z
+
+           M 34 30
+           V 33
+           H 46
+           V 30
+           Z
+
+           M 54 24
+           L 59 29
+           H 61
+           L 58 24
+           Z
+
+           M 74 24
+           Q 86 36 74 48
+           L 72 46
+           Q 83 36 72 26
+           Z
+
+          "/>
+</svg>
