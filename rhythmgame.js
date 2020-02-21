@@ -137,7 +137,7 @@
    */
   class Blitbuffer {
     constructor(length) {
-      this._buffer = [ ...Buffer(length) ]
+      this._buffer = [ ...new Buffer(length) ]
       this.length  = 0
     }
 
@@ -174,9 +174,9 @@
   }
 
   /**
-   * Constructor
+   * Rhythmgame
    */
-  class Constructor {
+  class Rhythmgame {
     async load() {
       const profile  = document.querySelector(`script#rhythmgame`).getAttribute(`name`)
       Object.assign(this, await this._fetch(`${profile}/settings.json`))
@@ -236,14 +236,14 @@
       for (const [ k, v ] of _settings) settings[k] = await this._fetch(v)
     }
 
-    _parse(driver, sheet) {
-      this.driver = driver
-      return driver.parse(sheet)
+    _parse(parserdriver, sheet) {
+      this.parserdriver = parserdriver
+      return parserdriver.parse(sheet)
     }
 
     build() {
       this.stage = this._prepare_stage()
-      this.sheet = this.driver.prepare(this.sheet)
+      this.sheet = this.parserdriver.prepare(this.sheet)
     }
 
     _prepare_stage() {
@@ -296,7 +296,7 @@
   /**
    * Parser Driver of Music Sheet (Interface)
    */
-  class Driver {
+  class ParserDriver {
     parse(sheet) {}
     prepare(sheet) {}
     calc_judgetime(note, player, moment) {}
@@ -305,7 +305,7 @@
   /**
    * Parser Driver of Music Sheet (for StepMania)
    */
-  class StepMania extends Driver {
+  class StepMania extends ParserDriver {
     parse(sheet) {
       return sheet.split(/[\n\r]+/).reduce((acc, line) => {
         if (line.includes(`,  //`)) return `${acc},`
@@ -387,7 +387,7 @@
   /**
    * Parser Driver of Music Sheet (for Dancing Onigiri)
    */
-  class DancingOnigiri extends Driver {
+  class DancingOnigiri extends ParserDriver {
     parse(sheet) {
       return sheet.split(/[\n\r\&]+/).filter(line => {
         return /.=./.test(line)
@@ -525,44 +525,44 @@
    * Scene Interface
    */
   class Scene {
-    setup(constructor) {
-      const layout = JSON.parse(JSON.stringify(constructor.layout[this.constructor.name.toLowerCase()]))
-      this.expand(constructor, layout).forEach(object => {
-        Object.assign(constructor.stage[0], object[0])
-        constructor.stage[0].fillText(...object[1])
+    setup(rhythmgame) {
+      const layout = JSON.parse(JSON.stringify(rhythmgame.layout[this.constructor.name.toLowerCase()]))
+      this.expand(rhythmgame, layout).forEach(object => {
+        Object.assign(rhythmgame.stage[0], object[0])
+        rhythmgame.stage[0].fillText(...object[1])
       })
     }
 
-    expand(constructor, layout) { }
-    update(constructor, tick) {}
-    render(constructor, tick) {}
-    onkeydown(constructor, event) {}
-    onkeyup(constructor, event) {}
+    expand(rhythmgame, layout) { }
+    update(rhythmgame, tick) {}
+    render(rhythmgame, tick) {}
+    onkeydown(rhythmgame, event) {}
+    onkeyup(rhythmgame, event) {}
   }
 
   /**
    * Title Scene
    */
   class Title extends Scene {
-    expand(constructor, layout) {
+    expand(rhythmgame, layout) {
       layout.forEach(object => {
         switch (object[1][0]) {
         case `title` :
-          object[1][0] = constructor.tags.title
+          object[1][0] = rhythmgame.tags.title
           break
         case `artist` :
-          object[1][0] = constructor.tags.artist
+          object[1][0] = rhythmgame.tags.artist
           break
         }
       })
       return layout
     }
 
-    onkeydown(constructor, event) {
+    onkeydown(rhythmgame, event) {
       switch (event.key) {
         case `Enter`:
           event.preventDefault()
-          constructor.setup(new Game())
+          rhythmgame.setup(new Game())
           return
       }
     }
@@ -572,47 +572,47 @@
    * Game Scene
    */
   class Game extends Scene {
-    setup(constructor) {
-      this.player  = new Player(constructor.sheet.totalnotes)
-      this._buffer = new Blitbuffer(constructor.sheet.totalnotes)
+    setup(rhythmgame) {
+      this.player  = new Player(rhythmgame.sheet.totalnotes)
+      this._buffer = new Blitbuffer(rhythmgame.sheet.totalnotes)
 
-      constructor.music.currentTime = 0
-      constructor.music.play()
-      constructor.music.addEventListener(`ended`, _ => { this.player.gameover = true }, { once : true })
+      rhythmgame.music.currentTime = 0
+      rhythmgame.music.play()
+      rhythmgame.music.addEventListener(`ended`, _ => { this.player.gameover = true }, { once : true })
 
-      constructor.sheet.checkpoint.rewind()
-      constructor.sheet.timeline.rewind()
-      constructor.sheet.lanes.forEach(lane => lane.rewind())
+      rhythmgame.sheet.checkpoint.rewind()
+      rhythmgame.sheet.timeline.rewind()
+      rhythmgame.sheet.lanes.forEach(lane => lane.rewind())
     }
 
-    update(constructor, tick) {
+    update(rhythmgame, tick) {
       if (this.player.gameover) {
-        constructor.music.pause()
-        constructor.setup(new Title())
+        rhythmgame.music.pause()
+        rhythmgame.setup(new Title())
       }
 
       const second     = (tick - this.player.started_at) / 1000
-      const moment     = constructor.sheet.timeline.forward(second)
+      const moment     = rhythmgame.sheet.timeline.forward(second)
       this.player.time = moment.time + (second - moment.second) * moment.velocity
 
-      constructor.sheet.lanes.forEach((lane, i) => {
-        if (this.player.time >= lane.at(0).time + lane.at(0).delay_judge * Number(!constructor.option.autoplay))
-          this._judge(constructor, lane, i)
+      rhythmgame.sheet.lanes.forEach((lane, i) => {
+        if (this.player.time >= lane.at(0).time + lane.at(0).delay_judge * Number(!rhythmgame.option.autoplay))
+          this._judge(rhythmgame, lane, i)
 
         if (this.player.state_lnjudges[i] !== 0)
-          this._judgeln(constructor, lane, i)
+          this._judgeln(rhythmgame, lane, i)
       })
 
-      if (this.player.time >= constructor.sheet.checkpoint.at(0).time) {
+      if (this.player.time >= rhythmgame.sheet.checkpoint.at(0).time) {
         this._combocount(this.player.score)
-        requestAnimationFrame(_ => constructor.setup(new Result(this.player.score)))
-        constructor.sheet.checkpoint.shift()
+        requestAnimationFrame(_ => rhythmgame.setup(new Result(this.player.score)))
+        rhythmgame.sheet.checkpoint.shift()
       }
     }
 
-    _judge(constructor, lane, index) {
+    _judge(rhythmgame, lane, index) {
       if (this.player.state_lnjudges[index] !== 0) {
-        this._judgeln(constructor, lane, index)
+        this._judgeln(rhythmgame, lane, index)
         return
       }
 
@@ -620,11 +620,11 @@
       const timing_great = 0.050
       const timing_good  = 0.100
 
-      const time = constructor.driver.calc_judgetime(lane.at(0), this.player, constructor.sheet.timeline.at(0))
+      const time = rhythmgame.parserdriver.calc_judgetime(lane.at(0), this.player, rhythmgame.sheet.timeline.at(0))
       if (time >= timing_good) return
 
       if (time <= -timing_good) {
-        this._calcreset(constructor)
+        this._calcreset(rhythmgame)
         lane.shift()
         return
       }
@@ -640,38 +640,38 @@
         return
       }
 
-      this._calculate(constructor, judge)
+      this._calculate(rhythmgame, judge)
       lane.shift()
     }
 
-    _judgeln(constructor, lane, index) {
-      if (!constructor.option.autoplay && !this.player.state_inputs[index]) {
-        this._calcreset(constructor)
+    _judgeln(rhythmgame, lane, index) {
+      if (!rhythmgame.option.autoplay && !this.player.state_inputs[index]) {
+        this._calcreset(rhythmgame)
         this.player.state_lnjudges[index] = 0
         lane.shift()
         return
       }
 
-      const time = constructor.driver.calc_judgetimeln(lane.at(0), this.player, constructor.sheet.timeline.at(0))
+      const time = rhythmgame.parserdriver.calc_judgetimeln(lane.at(0), this.player, rhythmgame.sheet.timeline.at(0))
       if (time > 0) return
 
-      this._calculate(constructor, this.player.state_lnjudges[index])
+      this._calculate(rhythmgame, this.player.state_lnjudges[index])
       this.player.state_lnjudges[index] = 0
       lane.shift()
     }
 
-    _calculate(constructor, judge) {
+    _calculate(rhythmgame, judge) {
       this.player.score.judges[judge]++
       this.player.score.combo++
       this.player.state_judge = judge
-      requestAnimationFrame(_ => this._draw_combo(constructor))
+      requestAnimationFrame(_ => this._draw_combo(rhythmgame))
     }
 
-    _calcreset(constructor) {
+    _calcreset(rhythmgame) {
       this.player.score.judges[Judge.BAD]++
       this._combocount(this.player.score)
       this.player.state_judge = 0
-      requestAnimationFrame(_ => this._draw_combo(constructor))
+      requestAnimationFrame(_ => this._draw_combo(rhythmgame))
     }
 
     _combocount(score) {
@@ -679,29 +679,29 @@
       score.combo = 0
     }
 
-    render(constructor, tick) {
-      const width  = constructor.stage[0].canvas.width
-      const height = constructor.stage[0].canvas.height
-      this._clear(constructor.stage)
+    render(rhythmgame, tick) {
+      const width  = rhythmgame.stage[0].canvas.width
+      const height = rhythmgame.stage[0].canvas.height
+      this._clear(rhythmgame.stage)
 
-      constructor.sheet.lanes.forEach((lane, i) => {
-        constructor.stage[0].fillStyle = constructor.layout.game.notecolor[i]
+      rhythmgame.sheet.lanes.forEach((lane, i) => {
+        rhythmgame.stage[0].fillStyle = rhythmgame.layout.game.notecolor[i]
 
         for (let j = 0; j < lane.length; j++) {
           const note = lane.at(j)
           if (note.time > this.player.time + note.lifetime) continue
 
-          const y = Math.min(height, Math.trunc(height * constructor.option.speed * (this.player.time - note.time) / note.lifetime + height))
+          const y = Math.min(height, Math.trunc(height * rhythmgame.option.speed * (this.player.time - note.time) / note.lifetime + height))
 
           if (note.timeln === 0) {
-            this._blit(y, i, constructor.stage)
+            this._blit(y, i, rhythmgame.stage)
             continue
           }
 
-          const y2 = Math.trunc(height * constructor.option.speed * (this.player.time - note.timeln) / note.lifetime + height)
-          this._draw_bar(y, y2, i, constructor.stage)
-          this._blit(y,  i, constructor.stage)
-          this._blit(y2, i, constructor.stage)
+          const y2 = Math.trunc(height * rhythmgame.option.speed * (this.player.time - note.timeln) / note.lifetime + height)
+          this._draw_bar(y, y2, i, rhythmgame.stage)
+          this._blit(y,  i, rhythmgame.stage)
+          this._blit(y2, i, rhythmgame.stage)
         }
       })
     }
@@ -727,25 +727,25 @@
       this._buffer.clear()
     }
 
-    _draw_combo(constructor) {
-      constructor.stage[1].fillStyle = constructor.layout.game.judgecolor[this.player.state_judge]
-      constructor.stage[1].clearRect(0, constructor.stage[1].canvas.height / 2 - 24, constructor.stage[1].canvas.width, 48)
+    _draw_combo(rhythmgame) {
+      rhythmgame.stage[1].fillStyle = rhythmgame.layout.game.judgecolor[this.player.state_judge]
+      rhythmgame.stage[1].clearRect(0, rhythmgame.stage[1].canvas.height / 2 - 24, rhythmgame.stage[1].canvas.width, 48)
 
       if (this.player.state_judge === 0) return
-      constructor.stage[1].fillText(this.player.score.combo, constructor.stage[1].canvas.width / 2, constructor.stage[1].canvas.height / 2)
+      rhythmgame.stage[1].fillText(this.player.score.combo, rhythmgame.stage[1].canvas.width / 2, rhythmgame.stage[1].canvas.height / 2)
     }
 
-    onkeydown(constructor, event) {
-      const speed = constructor.option.speed
+    onkeydown(rhythmgame, event) {
+      const speed = rhythmgame.option.speed
       switch (event.key) {
         case `Tab`:
           event.preventDefault()
-          constructor.option.speed = Math.min(speed + 0.25, 5.00)
+          rhythmgame.option.speed = Math.min(speed + 0.25, 5.00)
           return
 
         case `Shift`:
           event.preventDefault()
-          constructor.option.speed = Math.max(speed - 0.25, 1.00)
+          rhythmgame.option.speed = Math.max(speed - 0.25, 1.00)
           return
 
         case `Delete`:
@@ -754,18 +754,18 @@
           return
       }
 
-      if (constructor.option.autoplay) return
+      if (rhythmgame.option.autoplay) return
 
-      [].forEach.call(constructor.option.keybinds, (key, i) => {
+      [].forEach.call(rhythmgame.option.keybinds, (key, i) => {
         if (event.key !== key) return
         this.player.state_inputs[i] = true
-        this._judge(constructor, constructor.sheet.lanes[i], i)
+        this._judge(rhythmgame, rhythmgame.sheet.lanes[i], i)
       })
     }
 
-    onkeyup(constructor, event) {
-      if (constructor.option.autoplay) return
-      [].forEach.call(constructor.option.keybinds, (key, i) => {
+    onkeyup(rhythmgame, event) {
+      if (rhythmgame.option.autoplay) return
+      [].forEach.call(rhythmgame.option.keybinds, (key, i) => {
         if (event.key !== key) return
         this.player.state_inputs[i] = false
       })
@@ -781,7 +781,7 @@
       this.score = score
     }
 
-    expand(constructor, layout) {
+    expand(rhythmgame, layout) {
       layout.forEach(object => {
         switch (object[1][0]) {
         case `cool` :
@@ -806,11 +806,11 @@
   }
 
   async function main() {
-    const constructor = new Constructor()
-    await constructor.load()
-          constructor.build()
-          constructor.setup(new Title())
-          constructor.start()
+    const rhythmgame = new Rhythmgame()
+    await rhythmgame.load()
+          rhythmgame.build()
+          rhythmgame.setup(new Title())
+          rhythmgame.start()
   }
 
   document.addEventListener(`DOMContentLoaded`, _ => main())
