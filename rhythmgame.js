@@ -178,7 +178,7 @@
    */
   class Rhythmgame {
     async load() {
-      const profile  = document.querySelector(`script#rhythmgame`).getAttribute(`name`)
+      const profile = document.querySelector(`script#rhythmgame`).getAttribute(`name`)
       Object.assign(this, await this._fetch(`${profile}/settings.json`))
       Object.assign(this, await this._proc(this))
     }
@@ -222,7 +222,7 @@
 
       case `json` :
         return new Promise((resolve, reject) => {
-          const request   = new XMLHttpRequest()
+          const request = new XMLHttpRequest()
           request.addEventListener(`load`,  _ => resolve(JSON.parse(request.responseText)))
           request.addEventListener(`error`, _ => reject(request.statusText))
           request.open(`GET`, url)
@@ -548,10 +548,10 @@
       layout.forEach(object => {
         switch (object[1][0]) {
         case `title` :
-          object[1][0] = rhythmgame.tags.title
+          object[1][0] = rhythmgame.tag.title
           break
         case `artist` :
-          object[1][0] = rhythmgame.tags.artist
+          object[1][0] = rhythmgame.tag.artist
           break
         }
       })

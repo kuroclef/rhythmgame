@@ -1,0 +1,24 @@
+{
+  "title" : [
+    [ { "font" : "300 48px Open Sans", "fillStyle" : "#fff", "textAlign" : "left"   }, [ "title",        40,  80 ] ],
+    [ { "font" : "300 24px Open Sans"                                               }, [ "artist",       44, 120 ] ],
+    [ { "font" : "300 36px Open Sans"                                               }, [ "Press Enter",  40, 400 ] ]
+  ],
+  "game" : {
+    "notecolor"  : [ "#ccc", "#33f", "#ccc", "#f33", "#ccc", "#33f", "#ccc" ],
+    "judgecolor" : [ "#f00", "#ff0", "#0ff", "#33f" ]
+  },
+  "result" : [
+    [ { "font" : "300 48px Open Sans", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Game Clear!", 175,  80 ] ],
+    [ { "font" : "300 36px Open Sans", "fillStyle" : "#ff0", "textAlign" : "left"   }, [ "Cool",         60, 160 ] ],
+    [ { "font" : "300 36px Open Sans", "fillStyle" : "#0ff"                         }, [ "Great",        60, 200 ] ],
+    [ { "font" : "300 36px Open Sans", "fillStyle" : "#33f"                         }, [ "Good",         60, 240 ] ],
+    [ { "font" : "300 36px Open Sans", "fillStyle" : "#f33"                         }, [ "Bad",          60, 280 ] ],
+    [ { "font" : "300 36px Open Sans", "fillStyle" : "#fff"                         }, [ "Score",        50, 360 ] ],
+    [ { "font" : "300 36px Open Sans", "fillStyle" : "#ff0", "textAlign" : "right"  }, [ "cool",        290, 160 ] ],
+    [ { "font" : "300 36px Open Sans", "fillStyle" : "#0ff"                         }, [ "great",       290, 200 ] ],
+    [ { "font" : "300 36px Open Sans", "fillStyle" : "#33f"                         }, [ "good",        290, 240 ] ],
+    [ { "font" : "300 36px Open Sans", "fillStyle" : "#f33"                         }, [ "bad",         290, 280 ] ],
+    [ { "font" : "300 36px Open Sans", "fillStyle" : "#fff"                         }, [ "score",       300, 360 ] ]
+  ]
+}
