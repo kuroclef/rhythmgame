@@ -1,8 +1,13 @@
 {
+  "stage" : {
+    "width"  : "600px",
+    "height" : "500px"
+  },
   "title" : [
-    [ { "font" : "300 48px Open Sans", "fillStyle" : "#fff", "textAlign" : "left"   }, [ "title",        40,  80 ] ],
-    [ { "font" : "300 24px Open Sans"                                               }, [ "artist",       44, 120 ] ],
-    [ { "font" : "300 36px Open Sans"                                               }, [ "Press Enter",  40, 400 ] ]
+    [ { "font" : "300 48px Open Sans", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Dancing☆Onigiri", 300, 100 ] ],
+    [ { "font" : "300 80px Open Sans", "fillStyle" : "#fff", "textAlign" : "center" }, [ "title",           300, 250 ] ],
+    [ { "font" : "300 24px Open Sans", "fillStyle" : "#fff", "textAlign" : "right"  }, [ "artist",          580, 480 ] ],
+    [ { "font" : "300 48px Open Sans", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Press Enter",     300, 400 ] ]
   ],
   "game" : {
     "notecolor"  : [ "#ccc", "#33f", "#ccc", "#f33", "#ccc", "#33f", "#ccc" ],

@@ -248,6 +248,7 @@
 
     _prepare_stage() {
       const container = document.querySelector(`div#stage`)
+      Object.assign(container.style, this.layout.stage)
       return [ ...Array(2) ].map((_, i) => {
         const canvas  = document.createElement(`canvas`)
         canvas.width  = parseInt(container.style.width)
