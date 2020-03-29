@@ -1,29 +1,38 @@
 {
   "stage" : {
-    "width"  : "600px",
-    "height" : "500px"
+    "width"      : "600px",
+    "height"     : "500px",
+    "background" : "#111"
   },
-  "title" : [
-    [ { "font" : "300 48px Open Sans", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Dancing☆Onigiri", 300, 100 ] ],
-    [ { "font" : "300 80px Open Sans", "fillStyle" : "#fff", "textAlign" : "center" }, [ "title",           300, 250 ] ],
-    [ { "font" : "300 24px Open Sans", "fillStyle" : "#fff", "textAlign" : "right"  }, [ "artist",          580, 480 ] ],
-    [ { "font" : "300 48px Open Sans", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Press Enter",     300, 400 ] ]
-  ],
   "game" : {
-    "notecolor"  : [ "#ccc", "#33f", "#ccc", "#f33", "#ccc", "#33f", "#ccc" ],
-    "judgecolor" : [ "#f00", "#ff0", "#0ff", "#33f" ]
+    "lane" : {
+      "color" : [ "#ccc", "#33f", "#ccc", "#f33", "#ccc", "#33f", "#ccc" ]
+    },
+    "judge" : {
+      "color" : [ "#f00", "#ff0", "#0ff", "#33f" ]
+    }
   },
-  "result" : [
-    [ { "font" : "300 48px Open Sans", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Game Clear!", 175,  80 ] ],
-    [ { "font" : "300 36px Open Sans", "fillStyle" : "#ff0", "textAlign" : "left"   }, [ "Cool",         60, 160 ] ],
-    [ { "font" : "300 36px Open Sans", "fillStyle" : "#0ff"                         }, [ "Great",        60, 200 ] ],
-    [ { "font" : "300 36px Open Sans", "fillStyle" : "#33f"                         }, [ "Good",         60, 240 ] ],
-    [ { "font" : "300 36px Open Sans", "fillStyle" : "#f33"                         }, [ "Bad",          60, 280 ] ],
-    [ { "font" : "300 36px Open Sans", "fillStyle" : "#fff"                         }, [ "Score",        50, 360 ] ],
-    [ { "font" : "300 36px Open Sans", "fillStyle" : "#ff0", "textAlign" : "right"  }, [ "cool",        290, 160 ] ],
-    [ { "font" : "300 36px Open Sans", "fillStyle" : "#0ff"                         }, [ "great",       290, 200 ] ],
-    [ { "font" : "300 36px Open Sans", "fillStyle" : "#33f"                         }, [ "good",        290, 240 ] ],
-    [ { "font" : "300 36px Open Sans", "fillStyle" : "#f33"                         }, [ "bad",         290, 280 ] ],
-    [ { "font" : "300 36px Open Sans", "fillStyle" : "#fff"                         }, [ "score",       300, 360 ] ]
-  ]
+  "title" : {
+    "text" : [
+      [ { "font" : "300 48px Open Sans", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Dancing☆Onigiri", 300, 100 ] ],
+      [ { "font" : "300 80px Open Sans", "fillStyle" : "#fff", "textAlign" : "center" }, [ "__TITLE__",       300, 250 ] ],
+      [ { "font" : "300 48px Open Sans", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Press Enter",     300, 400 ] ],
+      [ { "font" : "300 24px Open Sans", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Maker : __EDITOR__　Music : __ARTIST__", 300, 480 ] ]
+    ]
+  },
+  "result" : {
+    "text" : [
+      [ { "font" : "300 48px Open Sans", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Game Clear!", 175,  80 ] ],
+      [ { "font" : "300 36px Open Sans", "fillStyle" : "#ff0", "textAlign" : "left"   }, [ "Cool",         60, 160 ] ],
+      [ { "font" : "300 36px Open Sans", "fillStyle" : "#0ff", "textAlign" : "left"   }, [ "Great",        60, 200 ] ],
+      [ { "font" : "300 36px Open Sans", "fillStyle" : "#33f", "textAlign" : "left"   }, [ "Good",         60, 240 ] ],
+      [ { "font" : "300 36px Open Sans", "fillStyle" : "#f33", "textAlign" : "left"   }, [ "Bad",          60, 280 ] ],
+      [ { "font" : "300 36px Open Sans", "fillStyle" : "#fff", "textAlign" : "left"   }, [ "Score",        50, 360 ] ],
+      [ { "font" : "300 36px Open Sans", "fillStyle" : "#ff0", "textAlign" : "right"  }, [ "__COOL__",    290, 160 ] ],
+      [ { "font" : "300 36px Open Sans", "fillStyle" : "#0ff", "textAlign" : "right"  }, [ "__GREAT__",   290, 200 ] ],
+      [ { "font" : "300 36px Open Sans", "fillStyle" : "#33f", "textAlign" : "right"  }, [ "__GOOD__",    290, 240 ] ],
+      [ { "font" : "300 36px Open Sans", "fillStyle" : "#f33", "textAlign" : "right"  }, [ "__BAD__",     290, 280 ] ],
+      [ { "font" : "300 36px Open Sans", "fillStyle" : "#fff", "textAlign" : "right"  }, [ "__SCORE__",   300, 360 ] ]
+    ]
+  }
 }

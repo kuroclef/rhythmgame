@@ -528,9 +528,9 @@
   class Scene {
     setup(rhythmgame) {
       const layout = JSON.parse(JSON.stringify(rhythmgame.layout[this.constructor.name.toLowerCase()]))
-      this.expand(rhythmgame, layout).forEach(object => {
-        Object.assign(rhythmgame.stage[0], object[0])
-        rhythmgame.stage[0].fillText(...object[1])
+      this.expand(rhythmgame, layout).forEach(text => {
+        Object.assign(rhythmgame.stage[0], text[0])
+        rhythmgame.stage[0].fillText(...text[1])
       })
     }
 
@@ -546,17 +546,12 @@
    */
   class Title extends Scene {
     expand(rhythmgame, layout) {
-      layout.forEach(object => {
-        switch (object[1][0]) {
-        case `title` :
-          object[1][0] = rhythmgame.tag.title
-          break
-        case `artist` :
-          object[1][0] = rhythmgame.tag.artist
-          break
-        }
+      layout.text.forEach(text => {
+        text[1][0] = text[1][0].replace(`__TITLE__`,  rhythmgame.tag.title)
+        text[1][0] = text[1][0].replace(`__ARTIST__`, rhythmgame.tag.artist)
+        text[1][0] = text[1][0].replace(`__EDITOR__`, rhythmgame.tag.editor)
       })
-      return layout
+      return layout.text
     }
 
     onkeydown(rhythmgame, event) {
@@ -686,7 +681,7 @@
       this._clear(rhythmgame.stage)
 
       rhythmgame.sheet.lanes.forEach((lane, i) => {
-        rhythmgame.stage[0].fillStyle = rhythmgame.layout.game.notecolor[i]
+        rhythmgame.stage[0].fillStyle = rhythmgame.layout.game.lane.color[i]
 
         for (let j = 0; j < lane.length; j++) {
           const note = lane.at(j)
@@ -729,7 +724,7 @@
     }
 
     _draw_combo(rhythmgame) {
-      rhythmgame.stage[1].fillStyle = rhythmgame.layout.game.judgecolor[this.player.state_judge]
+      rhythmgame.stage[1].fillStyle = rhythmgame.layout.game.judge.color[this.player.state_judge]
       rhythmgame.stage[1].clearRect(0, rhythmgame.stage[1].canvas.height / 2 - 24, rhythmgame.stage[1].canvas.width, 48)
 
       if (this.player.state_judge === 0) return
@@ -783,26 +778,14 @@
     }
 
     expand(rhythmgame, layout) {
-      layout.forEach(object => {
-        switch (object[1][0]) {
-        case `cool` :
-          object[1][0] = this.score.judges[Judge.COOL]
-          break
-        case `great` :
-          object[1][0] = this.score.judges[Judge.GREAT]
-          break
-        case `good` :
-          object[1][0] = this.score.judges[Judge.GOOD]
-          break
-        case `bad` :
-          object[1][0] = this.score.judges[Judge.BAD]
-          break
-        case `score` :
-          object[1][0] = this.score.point
-          break
-        }
+      layout.text.forEach(text => {
+        text[1][0] = text[1][0].replace(`__COOL__`,  this.score.judges[Judge.COOL])
+        text[1][0] = text[1][0].replace(`__GREAT__`, this.score.judges[Judge.GREAT])
+        text[1][0] = text[1][0].replace(`__GOOD__`,  this.score.judges[Judge.GOOD])
+        text[1][0] = text[1][0].replace(`__BAD__`,   this.score.judges[Judge.BAD])
+        text[1][0] = text[1][0].replace(`__SCORE__`, this.score.point)
       })
-      return layout
+      return layout.text
     }
   }
 

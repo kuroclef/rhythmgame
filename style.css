@@ -13,10 +13,9 @@ h1 {
 }
 
 div#stage {
-  background-color : #111;
-  margin-left      : auto;
-  margin-right     : auto;
-  position         : relative;
+  margin-left  : auto;
+  margin-right : auto;
+  position     : relative;
 }
 
 div#stage canvas {

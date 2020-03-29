@@ -1,7 +1,8 @@
 {
   "tag" : {
     "title"  : "ENISHI",
-    "artist" : "ginsuke"
+    "artist" : "ginsuke",
+    "editor" : "utsubo"
   },
   "music"  : "//kuroclef.honifuwa.com/rhythmgame/enishi/music.mp3",
   "sheet"  : "enishi/sheet.ssc",
