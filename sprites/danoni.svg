@@ -1,9 +1,8 @@
-<svg width="368" height="96" version="1.1"
+<svg width="368" height="244" version="1.1"
      xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 
   <defs>
     <path id="arrow"
-          fill="black"
           d="M 26  0
              L  2 24
              L 26 48
@@ -25,7 +24,6 @@
             "/>
 
     <path id="arrow_fill"
-          fill="black"
           d="M 26  0
              L  2 24
              L 26 48
@@ -38,7 +36,6 @@
             "/>
 
   <path id="onigiri"
-        fill="black"
         d="M 26  0
            L  6 20
            L  8 22
@@ -98,7 +95,6 @@
           "/>
 
   <path id="onigiri_fill"
-        fill="black"
         d="M 26  0
            L  6 20
            L  6 24
@@ -110,6 +106,21 @@
            Z
 
           "/>
+
+  <rect id="arrow_bar"
+        fill-opacity="0.5"
+        x="0"
+        y="0"
+        width="44"
+        height="100"/>
+
+  <rect id="onigiri_bar"
+        fill-opacity="0.5"
+        x="0"
+        y="0"
+        width="68"
+        height="100"/>
+
   </defs>
 
   <use xlink:href="#arrow"        transform="translate(  0,  0) rotate(  0, 24,   24)"/>
@@ -127,4 +138,20 @@
   <use xlink:href="#arrow_fill"   transform="translate(224, 48) rotate( 90, 24,   24)"/>
   <use xlink:href="#arrow_fill"   transform="translate(272, 48) rotate(135, 24.5, 24.5)"/>
   <use xlink:href="#arrow_fill"   transform="translate(320, 48) rotate(180, 24,   24)"/>
+
+  <use xlink:href="#arrow_bar"    transform="translate(  2, 96)"/>
+  <use xlink:href="#arrow_bar"    transform="translate( 50, 96)"/>
+  <use xlink:href="#arrow_bar"    transform="translate( 98, 96)"/>
+  <use xlink:href="#onigiri_bar"  transform="translate(150, 96)"/>
+  <use xlink:href="#arrow_bar"    transform="translate(226, 96)"/>
+  <use xlink:href="#arrow_bar"    transform="translate(274, 96)"/>
+  <use xlink:href="#arrow_bar"    transform="translate(322, 96)"/>
+
+  <use xlink:href="#arrow"   fill="gray" transform="translate(  0, 196) rotate(  0, 24,   24)"/>
+  <use xlink:href="#arrow"   fill="gray" transform="translate( 48, 196) rotate(-45, 24.5, 24.5)"/>
+  <use xlink:href="#arrow"   fill="gray" transform="translate( 96, 196) rotate(-90, 24,   24)"/>
+  <use xlink:href="#onigiri" fill="gray" transform="translate(144, 196) rotate(  0, 40,   24)"/>
+  <use xlink:href="#arrow"   fill="gray" transform="translate(224, 196) rotate( 90, 24,   24)"/>
+  <use xlink:href="#arrow"   fill="gray" transform="translate(272, 196) rotate(135, 24.5, 24.5)"/>
+  <use xlink:href="#arrow"   fill="gray" transform="translate(320, 196) rotate(180, 24,   24)"/>
 </svg>

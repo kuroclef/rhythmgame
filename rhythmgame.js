@@ -527,8 +527,8 @@
    */
   class Scene {
     setup(rhythmgame) {
-      const layout = JSON.parse(JSON.stringify(rhythmgame.layout[this.constructor.name.toLowerCase()]))
-      this.expand(rhythmgame, layout).forEach(text => {
+      this.layout = JSON.parse(JSON.stringify(rhythmgame.layout[this.constructor.name.toLowerCase()]))
+      this.expand(rhythmgame, this.layout).forEach(text => {
         Object.assign(rhythmgame.stage[0], text[0])
         rhythmgame.stage[0].fillText(...text[1])
       })
@@ -569,6 +569,7 @@
    */
   class Game extends Scene {
     setup(rhythmgame) {
+      this.layout  = JSON.parse(JSON.stringify(rhythmgame.layout[this.constructor.name.toLowerCase()]))
       this.player  = new Player(rhythmgame.sheet.totalnotes)
       this._buffer = new Blitbuffer(rhythmgame.sheet.totalnotes)
 
@@ -676,43 +677,57 @@
     }
 
     render(rhythmgame, tick) {
-      const width  = rhythmgame.stage[0].canvas.width
-      const height = rhythmgame.stage[0].canvas.height
+      const height   = this.layout.lane.height
+      const target_y = height - this.layout.lane.face[0][3] / 2
       this._clear(rhythmgame.stage)
 
       rhythmgame.sheet.lanes.forEach((lane, i) => {
-        rhythmgame.stage[0].fillStyle = rhythmgame.layout.game.lane.color[i]
+        rhythmgame.stage[0].fillStyle = this.layout.lane.color[i]
 
         for (let j = 0; j < lane.length; j++) {
           const note = lane.at(j)
           if (note.time > this.player.time + note.lifetime) continue
 
-          const y = Math.min(height, Math.trunc(height * rhythmgame.option.speed * (this.player.time - note.time) / note.lifetime + height))
+          const y = Math.min(target_y, Math.trunc(height * rhythmgame.option.speed * (this.player.time - note.time) / note.lifetime + target_y))
 
           if (note.timeln === 0) {
-            this._blit(y, i, rhythmgame.stage)
+            this._blit(rhythmgame.sprite, y, i, rhythmgame.stage)
             continue
           }
 
-          const y2 = Math.trunc(height * rhythmgame.option.speed * (this.player.time - note.timeln) / note.lifetime + height)
-          this._draw_bar(y, y2, i, rhythmgame.stage)
-          this._blit(y,  i, rhythmgame.stage)
-          this._blit(y2, i, rhythmgame.stage)
+          const y2 = Math.min(target_y, Math.trunc(height * rhythmgame.option.speed * (this.player.time - note.timeln) / note.lifetime + target_y))
+          this._blit_bar(rhythmgame.sprite, y, y2, i, rhythmgame.stage)
+          this._blit(rhythmgame.sprite, y,  i, rhythmgame.stage)
+          this._blit(rhythmgame.sprite, y2, i, rhythmgame.stage)
         }
       })
-    }
 
-    _blit(y, i, stage) {
-      const rect = [ 50 * i, y - 10, 50, 10 ]
-      stage[0].fillRect(...rect)
+      const rect = [ this.layout.lane.x[0], target_y, this.layout.lane.target[2], this.layout.lane.target[3] ]
+      rhythmgame.stage[0].globalCompositeOperation = `destination-over`
+      drawImage(rhythmgame.stage[0], rhythmgame.sprite, ...this.layout.lane.target, this.layout.lane.x[0], target_y)
+      rhythmgame.stage[0].globalCompositeOperation = `source-over`
       this._buffer.push(rect)
     }
 
-    _draw_bar(y1, y2, i, stage) {
-      const rect = [ 50 * i, y2 - 10, 50, y1 - y2]
-      stage[0].globalAlpha = 0.5
+    _blit(sprite, y, i, stage) {
+      const rect = [ this.layout.lane.x[i], y, this.layout.lane.face[i][2], this.layout.lane.face[i][3] ]
+      drawImage(stage[0], sprite, ...this.layout.lane.face[i], this.layout.lane.x[i], y)
+      stage[0].globalCompositeOperation = `source-atop`
       stage[0].fillRect(...rect)
-      stage[0].globalAlpha = 1
+      stage[0].globalCompositeOperation = `source-over`
+      this._buffer.push(rect)
+    }
+
+    _blit_bar(sprite, y1, y2, i, stage) {
+      const _y2  = y2 + this.layout.lane.face_alpha[i][3] / 2
+      const rect = [ this.layout.lane.x[i], _y2, this.layout.lane.face_alpha[i][2], y1 - y2]
+      stage[0].drawImage(sprite, ...this.layout.lane.bar[i], this.layout.lane.x[i], _y2, this.layout.lane.bar[i][2], y1 - y2)
+      stage[0].globalCompositeOperation = `source-atop`
+      stage[0].fillRect(...rect)
+      stage[0].globalCompositeOperation = `destination-out`
+      drawImage(stage[0], sprite, ...this.layout.lane.face_alpha[i], this.layout.lane.x[i], y1)
+      drawImage(stage[0], sprite, ...this.layout.lane.face_alpha[i], this.layout.lane.x[i], y2)
+      stage[0].globalCompositeOperation = `source-over`
       this._buffer.push(rect)
     }
 
@@ -724,7 +739,7 @@
     }
 
     _draw_combo(rhythmgame) {
-      rhythmgame.stage[1].fillStyle = rhythmgame.layout.game.judge.color[this.player.state_judge]
+      rhythmgame.stage[1].fillStyle = this.layout.judge.color[this.player.state_judge]
       rhythmgame.stage[1].clearRect(0, rhythmgame.stage[1].canvas.height / 2 - 24, rhythmgame.stage[1].canvas.width, 48)
 
       if (this.player.state_judge === 0) return
@@ -798,4 +813,8 @@
   }
 
   document.addEventListener(`DOMContentLoaded`, _ => main())
+
+  function drawImage(context, image, sx, sy, sWidth, sHeight, dx, dy) {
+    context.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, sWidth, sHeight)
+  }
 }

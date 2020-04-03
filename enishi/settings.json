@@ -11,5 +11,6 @@
     "keybinds" : "sdf jkl",
     "autoplay" : true
   },
-  "layout" : "common/layout/danoni.json"
+  "layout" : "layouts/danoni.json",
+  "sprite" : "sprites/danoni.png"
 }
