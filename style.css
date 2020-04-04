@@ -1,20 +1,26 @@
-@import url(//fonts.googleapis.com/css?family=Open+Sans:300);
+@import url("//fonts.googleapis.com/css2?family=Open+Sans:wght@300&family=M+PLUS+1p:wght@300&display=swap");
 
 html {
-  color            : #fff;
-  background-color : #000;
-  text-align       : center;
+  line-height  : 1.42;
   -webkit-text-size-adjust : 100%;
 }
 
 body {
-  width        : 650px;
+  background   : #000;
+  color        : #fff;
   margin-left  : auto;
   margin-right : auto;
+  text-align   : center;
+  width        : 680px;
 }
 
-h1 {
-  font-family : "Open Sans";
+h1, h2, h3 {
+  font-family : "Open Sans", "M PLUS 1p", sans-serif;
+  font-weight : 300;
+}
+
+a, dl, ol, p, ul {
+  font-family : "Open Sans", "M PLUS 1p", sans-serif;
   font-weight : 300;
 }
 
@@ -26,10 +32,10 @@ div#stage {
 
 div#stage canvas {
   position : absolute;
-    top    : 0;
     left   : 0;
+    top    : 0;
 }
 
-ul, ol {
+ol, ul {
   text-align : left;
 }

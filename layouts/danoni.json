@@ -44,25 +44,25 @@
   },
   "title" : {
     "text" : [
-      [ { "font" : "300 48px Open Sans", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Dancing☆Onigiri", 300, 100 ] ],
-      [ { "font" : "300 80px Open Sans", "fillStyle" : "#fff", "textAlign" : "center" }, [ "__TITLE__",       300, 250 ] ],
-      [ { "font" : "300 48px Open Sans", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Press Enter",     300, 400 ] ],
-      [ { "font" : "300 24px Open Sans", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Maker : __EDITOR__　Music : __ARTIST__", 300, 480 ] ]
+      [ { "font" : "300 48px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Dancing☆Onigiri", 300, 100 ] ],
+      [ { "font" : "300 80px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "__TITLE__",       300, 250 ] ],
+      [ { "font" : "300 48px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Press Enter",     300, 400 ] ],
+      [ { "font" : "300 24px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Maker : __EDITOR__　Music : __ARTIST__", 300, 480 ] ]
     ]
   },
   "result" : {
     "text" : [
-      [ { "font" : "300 48px Open Sans", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Game Clear!", 175,  80 ] ],
-      [ { "font" : "300 36px Open Sans", "fillStyle" : "#ff0", "textAlign" : "left"   }, [ "Cool",         60, 160 ] ],
-      [ { "font" : "300 36px Open Sans", "fillStyle" : "#0ff", "textAlign" : "left"   }, [ "Great",        60, 200 ] ],
-      [ { "font" : "300 36px Open Sans", "fillStyle" : "#33f", "textAlign" : "left"   }, [ "Good",         60, 240 ] ],
-      [ { "font" : "300 36px Open Sans", "fillStyle" : "#f33", "textAlign" : "left"   }, [ "Bad",          60, 280 ] ],
-      [ { "font" : "300 36px Open Sans", "fillStyle" : "#fff", "textAlign" : "left"   }, [ "Score",        50, 360 ] ],
-      [ { "font" : "300 36px Open Sans", "fillStyle" : "#ff0", "textAlign" : "right"  }, [ "__COOL__",    290, 160 ] ],
-      [ { "font" : "300 36px Open Sans", "fillStyle" : "#0ff", "textAlign" : "right"  }, [ "__GREAT__",   290, 200 ] ],
-      [ { "font" : "300 36px Open Sans", "fillStyle" : "#33f", "textAlign" : "right"  }, [ "__GOOD__",    290, 240 ] ],
-      [ { "font" : "300 36px Open Sans", "fillStyle" : "#f33", "textAlign" : "right"  }, [ "__BAD__",     290, 280 ] ],
-      [ { "font" : "300 36px Open Sans", "fillStyle" : "#fff", "textAlign" : "right"  }, [ "__SCORE__",   300, 360 ] ]
+      [ { "font" : "300 48px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Game Clear!", 175,  80 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#ff0", "textAlign" : "left"   }, [ "Cool",         60, 160 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#0ff", "textAlign" : "left"   }, [ "Great",        60, 200 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#33f", "textAlign" : "left"   }, [ "Good",         60, 240 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#f33", "textAlign" : "left"   }, [ "Bad",          60, 280 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#fff", "textAlign" : "left"   }, [ "Score",        50, 360 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#ff0", "textAlign" : "right"  }, [ "__COOL__",    290, 160 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#0ff", "textAlign" : "right"  }, [ "__GREAT__",   290, 200 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#33f", "textAlign" : "right"  }, [ "__GOOD__",    290, 240 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#f33", "textAlign" : "right"  }, [ "__BAD__",     290, 280 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#fff", "textAlign" : "right"  }, [ "__SCORE__",   300, 360 ] ]
     ]
   }
 }
