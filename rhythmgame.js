@@ -184,50 +184,44 @@
     }
 
     _fetch(url) {
+      if (!url.includes(`.`)) return url
+
       const suffix = url.slice(url.lastIndexOf(`.`) + 1)
       switch (suffix) {
       case `png` :
-        return new Promise((resolve, reject) => {
-          const request = new Image()
-          request.src   = url
-          request.addEventListener(`load`,  _ => resolve(request))
-          request.addEventListener(`error`, _ => reject(request.statusText))
-        })
+        return fetch(url)
+          .then(response => response.blob())
+          .then(blob => {
+            const image = new Image()
+            image.src   = URL.createObjectURL(blob)
+            return image
+          })
 
       case `ogg` : case `mp3` :
-        return new Promise((resolve, reject) => {
-          const request = new Audio()
-          request.src   = url
-          request.addEventListener(`loadeddata`, _ => resolve(request))
-          request.addEventListener(`error`,      _ => reject(request))
-        })
+        return fetch(url)
+          .then(response => response.blob())
+          .then(blob => {
+            const audio = new Audio()
+            audio.src   = URL.createObjectURL(blob)
+            return audio
+          })
 
       case `ssc` :
-        return new Promise((resolve, reject) => {
-          const request = new XMLHttpRequest()
-          request.addEventListener(`load`,  _ => resolve(this._parse(new StepMania(), request.responseText)))
-          request.addEventListener(`error`, _ => reject(request.statusText))
-          request.open(`GET`, url)
-          request.send()
-        })
+        return fetch(url)
+          .then(response => response.text())
+          .then(text => this._parse(new StepMania(), text))
 
       case `txt` :
-        return new Promise((resolve, reject) => {
-          const request = new XMLHttpRequest()
-          request.addEventListener(`load`,  _ => resolve(this._parse(new DancingOnigiri(), request.responseText)))
-          request.addEventListener(`error`, _ => reject(request.statusText))
-          request.open(`GET`, url)
-          request.send()
-        })
+        return fetch(url)
+          .then(response => response.text())
+          .then(text => this._parse(new DancingOnigiri(), text))
 
       case `json` :
-        return new Promise((resolve, reject) => {
-          const request = new XMLHttpRequest()
-          request.addEventListener(`load`,  _ => resolve(JSON.parse(request.responseText)))
-          request.addEventListener(`error`, _ => reject(request.statusText))
-          request.open(`GET`, url)
-          request.send()
-        })
+        return fetch(url)
+          .then(response => response.json())
+
+      default :
+        return url
       }
     }
 
