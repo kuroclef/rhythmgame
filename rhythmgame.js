@@ -16,9 +16,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-`use strict`
-{
+`use strict`;
+(async () => {
   const number_of_lanes = 8
+
+  /**
+   * Enumeration of Layer on Stage
+   */
+  const Layer = Object.freeze({
+    BACKGROUND : 0,
+    JUDGELINE  : 1,
+    CONTAINER  : 2,
+    TEXTEFFECT : 3
+  })
 
   /**
    * Enumeration of Judge
@@ -152,7 +162,7 @@
     }
 
     clear() {
-      this._buffer.map(_ => null)
+      this._buffer.map(() => null)
       this.length = 0
     }
   }
@@ -162,7 +172,7 @@
    */
   class Score {
     constructor(totalnotes) {
-      this.judges     = Object.keys(Judge).map(_ => 0)
+      this.judges     = Object.keys(Judge).map(() => 0)
       this.combo      = 0
       this.maxcombo   = 0
       this.totalnotes = totalnotes
@@ -259,7 +269,7 @@
     setup(scene) {
       this.stage.forEach(layer => layer.clearRect(0, 0, layer.canvas.width, layer.canvas.height))
       this.scene = scene
-      this.scene.setup(this)
+      this.scene.setup()
     }
 
     start() {
@@ -271,20 +281,20 @@
 
     _update(tick) {
       requestAnimationFrame(tick => this._update(tick))
-      this.scene.update(this, tick)
+      this.scene.update(tick)
     }
 
     _render(tick) {
       requestAnimationFrame(tick => this._render(tick))
-      this.scene.render(this, tick)
+      this.scene.render(tick)
     }
 
     _onkeydown(event) {
-      this.scene.onkeydown(this, event)
+      this.scene.onkeydown(event)
     }
 
     _onkeyup(event) {
-      this.scene.onkeyup(this, event)
+      this.scene.onkeyup(event)
     }
   }
 
@@ -333,7 +343,7 @@
       }, {
         checkpoint : new Checkpoint(),
         timeline   : new Timeline(),
-        lanes      : [ ...Array(number_of_lanes) ].map(_ => new Lane())
+        lanes      : [ ...Array(number_of_lanes) ].map(() => new Lane())
       })
 
       const end = _sheet.lanes.reduce((acc, lane) => (lane.length !== 0) ? Math.max(acc, lane.at_last().timestamp) : acc, 0)
@@ -443,7 +453,7 @@
       }, {
         checkpoint : new Checkpoint(),
         timeline   : new Timeline(new Moment(0, 0, 60, 0)),
-        lanes      : [ ...Array(number_of_lanes) ].map(_ => new Lane())
+        lanes      : [ ...Array(number_of_lanes) ].map(() => new Lane())
       })
 
       _sheet.timeline.terminate(new Moment(Number.MAX_VALUE, 0, 0, 0))
@@ -508,8 +518,8 @@
     constructor(totalnotes) {
       this.time           = 0
       this.state_judge    = 0
-      this.state_lnjudges = [ ...Array(number_of_lanes) ].map(_ => 0)
-      this.state_inputs   = [ ...Array(number_of_lanes) ].map(_ => false)
+      this.state_lnjudges = [ ...Array(number_of_lanes) ].map(() => 0)
+      this.state_inputs   = [ ...Array(number_of_lanes) ].map(() => false)
       this.started_at     = performance.now()
       this.score          = new Score(totalnotes)
       this.gameover       = false
@@ -520,26 +530,26 @@
    * Scene Interface
    */
   class Scene {
-    setup(rhythmgame) {
+    setup() {
       this.layout = JSON.parse(JSON.stringify(rhythmgame.layout[this.constructor.name.toLowerCase()]))
-      this.expand(rhythmgame, this.layout).forEach(text => {
+      this.expand(this.layout).forEach(text => {
         Object.assign(rhythmgame.stage[0], text[0])
         rhythmgame.stage[0].fillText(...text[1])
       })
     }
 
-    expand(rhythmgame, layout) { }
-    update(rhythmgame, tick) {}
-    render(rhythmgame, tick) {}
-    onkeydown(rhythmgame, event) {}
-    onkeyup(rhythmgame, event) {}
+    expand(layout) { }
+    update(tick) {}
+    render(tick) {}
+    onkeydown(event) {}
+    onkeyup(event) {}
   }
 
   /**
    * Title Scene
    */
   class Title extends Scene {
-    expand(rhythmgame, layout) {
+    expand(layout) {
       layout.text.forEach(text => {
         text[1][0] = text[1][0].replace(`__TITLE__`,  rhythmgame.tag.title)
         text[1][0] = text[1][0].replace(`__ARTIST__`, rhythmgame.tag.artist)
@@ -548,7 +558,7 @@
       return layout.text
     }
 
-    onkeydown(rhythmgame, event) {
+    onkeydown(event) {
       switch (event.key) {
         case `Enter`:
           event.preventDefault()
@@ -562,21 +572,21 @@
    * Game Scene
    */
   class Game extends Scene {
-    setup(rhythmgame) {
+    setup() {
       this.layout  = JSON.parse(JSON.stringify(rhythmgame.layout[this.constructor.name.toLowerCase()]))
       this.player  = new Player(rhythmgame.sheet.totalnotes)
       this._buffer = new Blitbuffer(rhythmgame.sheet.totalnotes)
 
       rhythmgame.music.currentTime = 0
       rhythmgame.music.play()
-      rhythmgame.music.addEventListener(`ended`, _ => { this.player.gameover = true }, { once : true })
+      rhythmgame.music.addEventListener(`ended`, () => { this.player.gameover = true }, { once : true })
 
       rhythmgame.sheet.checkpoint.rewind()
       rhythmgame.sheet.timeline.rewind()
       rhythmgame.sheet.lanes.forEach(lane => lane.rewind())
     }
 
-    update(rhythmgame, tick) {
+    update(tick) {
       if (this.player.gameover) {
         rhythmgame.music.pause()
         rhythmgame.setup(new Title())
@@ -588,22 +598,22 @@
 
       rhythmgame.sheet.lanes.forEach((lane, i) => {
         if (this.player.time >= lane.at(0).time + lane.at(0).delay_judge * Number(!rhythmgame.option.autoplay))
-          this._judge(rhythmgame, lane, i)
+          this._judge(lane, i)
 
         if (this.player.state_lnjudges[i] !== 0)
-          this._judgeln(rhythmgame, lane, i)
+          this._judgeln(lane, i)
       })
 
       if (this.player.time >= rhythmgame.sheet.checkpoint.at(0).time) {
         this._combocount(this.player.score)
-        requestAnimationFrame(_ => rhythmgame.setup(new Result(this.player.score)))
+        requestAnimationFrame(() => rhythmgame.setup(new Result(this.player.score)))
         rhythmgame.sheet.checkpoint.shift()
       }
     }
 
-    _judge(rhythmgame, lane, index) {
+    _judge(lane, index) {
       if (this.player.state_lnjudges[index] !== 0) {
-        this._judgeln(rhythmgame, lane, index)
+        this._judgeln(lane, index)
         return
       }
 
@@ -615,7 +625,7 @@
       if (time >= timing_good) return
 
       if (time <= -timing_good) {
-        this._calcreset(rhythmgame)
+        this._calcreset()
         lane.shift()
         return
       }
@@ -631,13 +641,13 @@
         return
       }
 
-      this._calculate(rhythmgame, judge)
+      this._calculate(judge)
       lane.shift()
     }
 
-    _judgeln(rhythmgame, lane, index) {
+    _judgeln(lane, index) {
       if (!rhythmgame.option.autoplay && !this.player.state_inputs[index]) {
-        this._calcreset(rhythmgame)
+        this._calcreset()
         this.player.state_lnjudges[index] = 0
         lane.shift()
         return
@@ -646,23 +656,23 @@
       const time = rhythmgame.parserdriver.calc_judgetimeln(lane.at(0), this.player, rhythmgame.sheet.timeline.at(0))
       if (time > 0) return
 
-      this._calculate(rhythmgame, this.player.state_lnjudges[index])
+      this._calculate(this.player.state_lnjudges[index])
       this.player.state_lnjudges[index] = 0
       lane.shift()
     }
 
-    _calculate(rhythmgame, judge) {
+    _calculate(judge) {
       this.player.score.judges[judge]++
       this.player.score.combo++
       this.player.state_judge = judge
-      requestAnimationFrame(_ => this._draw_combo(rhythmgame))
+      requestAnimationFrame(() => this._draw_combo())
     }
 
-    _calcreset(rhythmgame) {
+    _calcreset() {
       this.player.score.judges[Judge.BAD]++
       this._combocount(this.player.score)
       this.player.state_judge = 0
-      requestAnimationFrame(_ => this._draw_combo(rhythmgame))
+      requestAnimationFrame(() => this._draw_combo())
     }
 
     _combocount(score) {
@@ -670,7 +680,7 @@
       score.combo = 0
     }
 
-    render(rhythmgame, tick) {
+    render(tick) {
       const height   = this.layout.lane.height
       const target_y = height - this.layout.lane.face[0][3] / 2
       this._clear(rhythmgame.stage)
@@ -732,7 +742,7 @@
       this._buffer.clear()
     }
 
-    _draw_combo(rhythmgame) {
+    _draw_combo() {
       rhythmgame.stage[1].fillStyle = this.layout.judge.color[this.player.state_judge]
       rhythmgame.stage[1].clearRect(0, rhythmgame.stage[1].canvas.height / 2 - 24, rhythmgame.stage[1].canvas.width, 48)
 
@@ -740,7 +750,7 @@
       rhythmgame.stage[1].fillText(this.player.score.combo, rhythmgame.stage[1].canvas.width / 2, rhythmgame.stage[1].canvas.height / 2)
     }
 
-    onkeydown(rhythmgame, event) {
+    onkeydown(event) {
       const speed = rhythmgame.option.speed
       switch (event.key) {
         case `Tab`:
@@ -764,11 +774,11 @@
       [].forEach.call(rhythmgame.option.keybinds, (key, i) => {
         if (event.key !== key) return
         this.player.state_inputs[i] = true
-        this._judge(rhythmgame, rhythmgame.sheet.lanes[i], i)
+        this._judge(rhythmgame.sheet.lanes[i], i)
       })
     }
 
-    onkeyup(rhythmgame, event) {
+    onkeyup(event) {
       if (rhythmgame.option.autoplay) return
       [].forEach.call(rhythmgame.option.keybinds, (key, i) => {
         if (event.key !== key) return
@@ -786,7 +796,7 @@
       this.score = score
     }
 
-    expand(rhythmgame, layout) {
+    expand(layout) {
       layout.text.forEach(text => {
         text[1][0] = text[1][0].replace(`__COOL__`,  this.score.judges[Judge.COOL])
         text[1][0] = text[1][0].replace(`__GREAT__`, this.score.judges[Judge.GREAT])
@@ -798,17 +808,13 @@
     }
   }
 
-  async function main() {
-    const rhythmgame = new Rhythmgame()
-    await rhythmgame.load()
-          rhythmgame.build()
-          rhythmgame.setup(new Title())
-          rhythmgame.start()
-  }
-
-  document.addEventListener(`DOMContentLoaded`, _ => main())
+  const rhythmgame = new Rhythmgame()
+  await rhythmgame.load()
+        rhythmgame.build()
+        rhythmgame.setup(new Title())
+        rhythmgame.start()
 
   function drawImage(context, image, sx, sy, sWidth, sHeight, dx, dy) {
     context.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, sWidth, sHeight)
   }
-}
+})()
