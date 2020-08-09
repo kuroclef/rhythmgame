@@ -1,11 +1,11 @@
 {
-  "tag" : {
-    "title"  : "夜雀の歌声",
-    "artist" : "中島岬",
-    "editor" : "goe×Cah-m"
+  "music" : {
+    "title"      : "夜雀の歌声",
+    "artist"     : "中島岬",
+    "noteeditor" : "goe×Cah-m"
   },
-  "music"  : "//kuroclef.honifuwa.com/rhythmgame/suzume/music.mp3",
-  "sheet"  : "dos.txt",
+  "sound"     : "//kuroclef.honifuwa.com/rhythmgame/suzume/music.mp3",
+  "notechart" : "dos.txt",
   "option" : {
     "speed"    : 2.5,
     "keybinds" : "sdf jkl",

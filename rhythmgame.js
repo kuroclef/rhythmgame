@@ -187,14 +187,10 @@
    * Rhythmgame
    */
   class Rhythmgame {
-    async load() {
-      const profile = document.querySelector(`script#rhythmgame`).getAttribute(`name`)
-      Object.assign(this, await this._fetch(`${profile}/settings.json`))
-      Object.assign(this, await this._proc(this))
-    }
-
-    _fetch(url) {
-      if (!url.includes(`.`)) return url
+    fetch(url) {
+      if (typeof url === `object`) return this._proc(url)
+      if (typeof url !== `string`) return url
+      if (!url.includes(`.`))      return url
 
       const suffix = url.slice(url.lastIndexOf(`.`) + 1)
       switch (suffix) {
@@ -229,6 +225,7 @@
       case `json` :
         return fetch(url)
           .then(response => response.json())
+          .then(json => this._proc(json))
 
       default :
         return url
@@ -236,23 +233,19 @@
     }
 
     async _proc(settings) {
-      const _settings = Object.entries(settings).filter(([ _, v ]) => typeof v === `string`)
-      for (const [ k, v ] of _settings) settings[k] = await this._fetch(v)
+      const s = Object.entries(settings)
+      for (const [ k, v ] of s) settings[k] = await this.fetch(v)
+      return settings
     }
 
-    _parse(parserdriver, sheet) {
-      this.parserdriver = parserdriver
-      return parserdriver.parse(sheet)
+    _parse(driver, notechart) {
+      rhythmgame.driver = driver
+      return driver.parse(notechart)
     }
 
-    build() {
-      this.stage = this._prepare_stage()
-      this.sheet = this.parserdriver.prepare(this.sheet)
-    }
-
-    _prepare_stage() {
+    prepare_stage() {
       const container = document.querySelector(`div#stage`)
-      Object.assign(container.style, this.layout.stage)
+      Object.assign(container.style, layout.stage)
       return [ ...Array(2) ].map((_, i) => {
         const canvas  = document.createElement(`canvas`)
         canvas.width  = parseInt(container.style.width)
@@ -267,7 +260,7 @@
     }
 
     setup(scene) {
-      this.stage.forEach(layer => layer.clearRect(0, 0, layer.canvas.width, layer.canvas.height))
+      stage.forEach(layer => layer.clearRect(0, 0, layer.canvas.width, layer.canvas.height))
       this.scene = scene
       this.scene.setup()
     }
@@ -299,20 +292,21 @@
   }
 
   /**
-   * Parser Driver of Music Sheet (Interface)
+   * Driver to Parse Notechart (Interface)
    */
-  class ParserDriver {
-    parse(sheet) {}
-    prepare(sheet) {}
+  class Driver {
+    parse(notechart) {}
+    prepare(notechart) {}
     calc_judgetime(note, player, moment) {}
+    calc_judgetimeln(note, player, moment) {}
   }
 
   /**
-   * Parser Driver of Music Sheet (for StepMania)
+   * Driver of StepMania
    */
-  class StepMania extends ParserDriver {
-    parse(sheet) {
-      return sheet.split(/[\n\r]+/).reduce((acc, line) => {
+  class StepMania extends Driver {
+    parse(notechart) {
+      const chart = notechart.split(/[\n\r]+/).reduce((acc, line) => {
         if (line.includes(`,  //`)) return `${acc},`
         if (line.includes(`//`))    return `${acc}`
                                     return `${acc}${line}`
@@ -320,11 +314,12 @@
         if (v.includes(`=`)) return v.split(`=`)
                              return v
       }))).map(([ k, v ]) => [ ...k, v ])
+      return this.prepare(chart)
     }
 
-    prepare(sheet) {
+    prepare(notechart) {
       let   offset = 0
-      const _sheet = sheet.reduce((acc, [ k, v ]) => {
+      const chart  = notechart.reduce((acc, [ k, v ]) => {
         switch (k) {
         case `#OFFSET` :
           offset = v[0]
@@ -346,13 +341,13 @@
         lanes      : [ ...Array(number_of_lanes) ].map(() => new Lane())
       })
 
-      const end = _sheet.lanes.reduce((acc, lane) => (lane.length !== 0) ? Math.max(acc, lane.at_last().timestamp) : acc, 0)
-      _sheet.checkpoint.terminate(new Timestamp(end + 1))
-      _sheet.checkpoint.terminate(new Timestamp(Number.MAX_VALUE))
-      _sheet.timeline.terminate(new Moment(Number.MAX_VALUE, 0, 0, 0))
-      _sheet.lanes.forEach(lane => lane.terminate(new Note(Number.MAX_VALUE, 0, 0, 0)))
-      _sheet.totalnotes = _sheet.lanes.reduce((acc, lane) => acc + lane.length, 0)
-      return _sheet
+      const end = chart.lanes.reduce((acc, lane) => (lane.length !== 0) ? Math.max(acc, lane.at_last().timestamp) : acc, 0)
+      chart.checkpoint.terminate(new Timestamp(end + 1))
+      chart.checkpoint.terminate(new Timestamp(Number.MAX_VALUE))
+      chart.timeline.terminate(new Moment(Number.MAX_VALUE, 0, 0, 0))
+      chart.lanes.forEach(lane => lane.terminate(new Note(Number.MAX_VALUE, 0, 0, 0)))
+      chart.totalnotes = chart.lanes.reduce((acc, lane) => acc + lane.length, 0)
+      return chart
     }
 
     _prepare_timeline(acc, [ beat, bpm ], i) {
@@ -390,17 +385,18 @@
   }
 
   /**
-   * Parser Driver of Music Sheet (for Dancing Onigiri)
+   * Driver of Dancing Onigiri
    */
-  class DancingOnigiri extends ParserDriver {
-    parse(sheet) {
-      return sheet.split(/[\n\r\&]+/).filter(line => {
+  class DancingOnigiri extends Driver {
+    parse(notechart) {
+      const chart = notechart.split(/[\n\r\&]+/).filter(line => {
         return /.=./.test(line)
       }).map(v => v.split(`=`).map(v => v.split(`,`))).map(([ k, v ]) => [ ...k, v ])
+      return this.prepare(chart)
     }
 
-    prepare(sheet) {
-      const _sheet   = sheet.reduce((acc, [ k, v ]) => {
+    prepare(notechart) {
+      const chart = notechart.reduce((acc, [ k, v ]) => {
         switch (k) {
         case `left_data` :
           return { ...acc, lanes : v.reduce(this._prepare_lanes.bind(this, 0), acc.lanes) }
@@ -456,19 +452,19 @@
         lanes      : [ ...Array(number_of_lanes) ].map(() => new Lane())
       })
 
-      _sheet.timeline.terminate(new Moment(Number.MAX_VALUE, 0, 0, 0))
+      chart.timeline.terminate(new Moment(Number.MAX_VALUE, 0, 0, 0))
 
-      _sheet.lanes.forEach(lane => {
+      chart.lanes.forEach(lane => {
         lane._array.sort((a, b) => a.time - b.time)
-        lane._array.map(note => this._realignment(note, _sheet))
+        lane._array.map(note => this._realignment(note, chart))
         lane.terminate(new Note(Number.MAX_VALUE, 0, 0, 0))
       })
 
-      const end = _sheet.lanes.reduce((acc, lane) => (lane.length !== 0) ? Math.max(acc, lane.at_last().timestamp) : acc, 0)
-      _sheet.checkpoint.terminate(new Timestamp(end + 200))
-      _sheet.checkpoint.terminate(new Timestamp(Number.MAX_VALUE))
-      _sheet.totalnotes = _sheet.lanes.reduce((acc, lane) => acc + lane.length, 0)
-      return _sheet
+      const end = chart.lanes.reduce((acc, lane) => (lane.length !== 0) ? Math.max(acc, lane.at_last().timestamp) : acc, 0)
+      chart.checkpoint.terminate(new Timestamp(end + 200))
+      chart.checkpoint.terminate(new Timestamp(Number.MAX_VALUE))
+      chart.totalnotes = chart.lanes.reduce((acc, lane) => acc + lane.length, 0)
+      return chart
     }
 
     _prepare_timeline(acc, _, i, speed_change) {
@@ -490,14 +486,14 @@
       return lanes
     }
 
-    _realignment(note, sheet) {
+    _realignment(note, notechart) {
       const second = note.time / 60
-      const moment = sheet.timeline.forward_tmp(second)
+      const moment = notechart.timeline.forward_tmp(second)
       note.time    = moment.time + (second - moment.second) * moment.velocity
       if (note.timeln === 0) return note
 
       const secondln = note.timeln / 60
-      const momentln = sheet.timeline.forward_tmp(secondln)
+      const momentln = notechart.timeline.forward_tmp(secondln)
       note.timeln    = momentln.time + (secondln - momentln.second) * momentln.velocity
       return note
     }
@@ -531,10 +527,10 @@
    */
   class Scene {
     setup() {
-      this.layout = JSON.parse(JSON.stringify(rhythmgame.layout[this.constructor.name.toLowerCase()]))
+      this.layout = JSON.parse(JSON.stringify(layout[this.constructor.name.toLowerCase()]))
       this.expand(this.layout).forEach(text => {
-        Object.assign(rhythmgame.stage[0], text[0])
-        rhythmgame.stage[0].fillText(...text[1])
+        Object.assign(stage[0], text[0])
+        stage[0].fillText(...text[1])
       })
     }
 
@@ -551,9 +547,9 @@
   class Title extends Scene {
     expand(layout) {
       layout.text.forEach(text => {
-        text[1][0] = text[1][0].replace(`__TITLE__`,  rhythmgame.tag.title)
-        text[1][0] = text[1][0].replace(`__ARTIST__`, rhythmgame.tag.artist)
-        text[1][0] = text[1][0].replace(`__EDITOR__`, rhythmgame.tag.editor)
+        text[1][0] = text[1][0].replace(`__TITLE__`,  music.title)
+        text[1][0] = text[1][0].replace(`__ARTIST__`, music.artist)
+        text[1][0] = text[1][0].replace(`__EDITOR__`, music.noteeditor)
       })
       return layout.text
     }
@@ -573,41 +569,41 @@
    */
   class Game extends Scene {
     setup() {
-      this.layout  = JSON.parse(JSON.stringify(rhythmgame.layout[this.constructor.name.toLowerCase()]))
-      this.player  = new Player(rhythmgame.sheet.totalnotes)
-      this._buffer = new Blitbuffer(rhythmgame.sheet.totalnotes)
+      this.layout  = JSON.parse(JSON.stringify(layout[this.constructor.name.toLowerCase()]))
+      this.player  = new Player(notechart.totalnotes)
+      this._buffer = new Blitbuffer(notechart.totalnotes)
 
-      rhythmgame.music.currentTime = 0
-      rhythmgame.music.play()
-      rhythmgame.music.addEventListener(`ended`, () => { this.player.gameover = true }, { once : true })
+      sound.currentTime = 0
+      sound.play()
+      sound.addEventListener(`ended`, () => { this.player.gameover = true }, { once : true })
 
-      rhythmgame.sheet.checkpoint.rewind()
-      rhythmgame.sheet.timeline.rewind()
-      rhythmgame.sheet.lanes.forEach(lane => lane.rewind())
+      notechart.checkpoint.rewind()
+      notechart.timeline.rewind()
+      notechart.lanes.forEach(lane => lane.rewind())
     }
 
     update(tick) {
       if (this.player.gameover) {
-        rhythmgame.music.pause()
+        sound.pause()
         rhythmgame.setup(new Title())
       }
 
       const second     = (tick - this.player.started_at) / 1000
-      const moment     = rhythmgame.sheet.timeline.forward(second)
+      const moment     = notechart.timeline.forward(second)
       this.player.time = moment.time + (second - moment.second) * moment.velocity
 
-      rhythmgame.sheet.lanes.forEach((lane, i) => {
-        if (this.player.time >= lane.at(0).time + lane.at(0).delay_judge * Number(!rhythmgame.option.autoplay))
+      notechart.lanes.forEach((lane, i) => {
+        if (this.player.time >= lane.at(0).time + lane.at(0).delay_judge * Number(!option.autoplay))
           this._judge(lane, i)
 
         if (this.player.state_lnjudges[i] !== 0)
           this._judgeln(lane, i)
       })
 
-      if (this.player.time >= rhythmgame.sheet.checkpoint.at(0).time) {
+      if (this.player.time >= notechart.checkpoint.at(0).time) {
         this._combocount(this.player.score)
         requestAnimationFrame(() => rhythmgame.setup(new Result(this.player.score)))
-        rhythmgame.sheet.checkpoint.shift()
+        notechart.checkpoint.shift()
       }
     }
 
@@ -621,7 +617,7 @@
       const timing_great = 0.050
       const timing_good  = 0.100
 
-      const time = rhythmgame.parserdriver.calc_judgetime(lane.at(0), this.player, rhythmgame.sheet.timeline.at(0))
+      const time = rhythmgame.driver.calc_judgetime(lane.at(0), this.player, notechart.timeline.at(0))
       if (time >= timing_good) return
 
       if (time <= -timing_good) {
@@ -646,14 +642,14 @@
     }
 
     _judgeln(lane, index) {
-      if (!rhythmgame.option.autoplay && !this.player.state_inputs[index]) {
+      if (!option.autoplay && !this.player.state_inputs[index]) {
         this._calcreset()
         this.player.state_lnjudges[index] = 0
         lane.shift()
         return
       }
 
-      const time = rhythmgame.parserdriver.calc_judgetimeln(lane.at(0), this.player, rhythmgame.sheet.timeline.at(0))
+      const time = rhythmgame.driver.calc_judgetimeln(lane.at(0), this.player, notechart.timeline.at(0))
       if (time > 0) return
 
       this._calculate(this.player.state_lnjudges[index])
@@ -683,33 +679,33 @@
     render(tick) {
       const height   = this.layout.lane.height
       const target_y = height - this.layout.lane.face[0][3] / 2
-      this._clear(rhythmgame.stage)
+      this._clear(stage)
 
-      rhythmgame.sheet.lanes.forEach((lane, i) => {
-        rhythmgame.stage[0].fillStyle = this.layout.lane.color[i]
+      notechart.lanes.forEach((lane, i) => {
+        stage[0].fillStyle = this.layout.lane.color[i]
 
         for (let j = 0; j < lane.length; j++) {
           const note = lane.at(j)
           if (note.time > this.player.time + note.lifetime) continue
 
-          const y = Math.min(target_y, Math.trunc(height * rhythmgame.option.speed * (this.player.time - note.time) / note.lifetime + target_y))
+          const y = Math.min(target_y, Math.trunc(height * option.speed * (this.player.time - note.time) / note.lifetime + target_y))
 
           if (note.timeln === 0) {
-            this._blit(rhythmgame.sprite, y, i, rhythmgame.stage)
+            this._blit(sprite, y, i, stage)
             continue
           }
 
-          const y2 = Math.min(target_y, Math.trunc(height * rhythmgame.option.speed * (this.player.time - note.timeln) / note.lifetime + target_y))
-          this._blit_bar(rhythmgame.sprite, y, y2, i, rhythmgame.stage)
-          this._blit(rhythmgame.sprite, y,  i, rhythmgame.stage)
-          this._blit(rhythmgame.sprite, y2, i, rhythmgame.stage)
+          const y2 = Math.min(target_y, Math.trunc(height * option.speed * (this.player.time - note.timeln) / note.lifetime + target_y))
+          this._blit_bar(sprite, y, y2, i, stage)
+          this._blit(sprite, y,  i, stage)
+          this._blit(sprite, y2, i, stage)
         }
       })
 
       const rect = [ this.layout.lane.x[0], target_y, this.layout.lane.target[2], this.layout.lane.target[3] ]
-      rhythmgame.stage[0].globalCompositeOperation = `destination-over`
-      drawImage(rhythmgame.stage[0], rhythmgame.sprite, ...this.layout.lane.target, this.layout.lane.x[0], target_y)
-      rhythmgame.stage[0].globalCompositeOperation = `source-over`
+      stage[0].globalCompositeOperation = `destination-over`
+      drawImage(stage[0], sprite, ...this.layout.lane.target, this.layout.lane.x[0], target_y)
+      stage[0].globalCompositeOperation = `source-over`
       this._buffer.push(rect)
     }
 
@@ -743,24 +739,24 @@
     }
 
     _draw_combo() {
-      rhythmgame.stage[1].fillStyle = this.layout.judge.color[this.player.state_judge]
-      rhythmgame.stage[1].clearRect(0, rhythmgame.stage[1].canvas.height / 2 - 24, rhythmgame.stage[1].canvas.width, 48)
+      stage[1].fillStyle = this.layout.judge.color[this.player.state_judge]
+      stage[1].clearRect(0, stage[1].canvas.height / 2 - 24, stage[1].canvas.width, 48)
 
       if (this.player.state_judge === 0) return
-      rhythmgame.stage[1].fillText(this.player.score.combo, rhythmgame.stage[1].canvas.width / 2, rhythmgame.stage[1].canvas.height / 2)
+      stage[1].fillText(this.player.score.combo, stage[1].canvas.width / 2, stage[1].canvas.height / 2)
     }
 
     onkeydown(event) {
-      const speed = rhythmgame.option.speed
+      const speed = option.speed
       switch (event.key) {
         case `Tab`:
           event.preventDefault()
-          rhythmgame.option.speed = Math.min(speed + 0.25, 5.00)
+          option.speed = Math.min(speed + 0.25, 5.00)
           return
 
         case `Shift`:
           event.preventDefault()
-          rhythmgame.option.speed = Math.max(speed - 0.25, 1.00)
+          option.speed = Math.max(speed - 0.25, 1.00)
           return
 
         case `Delete`:
@@ -769,18 +765,18 @@
           return
       }
 
-      if (rhythmgame.option.autoplay) return
+      if (option.autoplay) return
 
-      [].forEach.call(rhythmgame.option.keybinds, (key, i) => {
+      [].forEach.call(option.keybinds, (key, i) => {
         if (event.key !== key) return
         this.player.state_inputs[i] = true
-        this._judge(rhythmgame.sheet.lanes[i], i)
+        this._judge(notechart.lanes[i], i)
       })
     }
 
     onkeyup(event) {
-      if (rhythmgame.option.autoplay) return
-      [].forEach.call(rhythmgame.option.keybinds, (key, i) => {
+      if (option.autoplay) return
+      [].forEach.call(option.keybinds, (key, i) => {
         if (event.key !== key) return
         this.player.state_inputs[i] = false
       })
@@ -809,10 +805,14 @@
   }
 
   const rhythmgame = new Rhythmgame()
-  await rhythmgame.load()
-        rhythmgame.build()
-        rhythmgame.setup(new Title())
-        rhythmgame.start()
+  const profile    = document.querySelector(`script#rhythmgame`).getAttribute(`name`)
+
+  const { music, sound, notechart, option, layout, sprite } = await rhythmgame.fetch(`${_profile}/settings.json`)
+
+  const stage = rhythmgame.prepare_stage()
+
+  rhythmgame.setup(new Title())
+  rhythmgame.start()
 
   function drawImage(context, image, sx, sy, sWidth, sHeight, dx, dy) {
     context.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, sWidth, sHeight)

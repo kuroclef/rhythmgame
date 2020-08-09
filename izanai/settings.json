@@ -1,11 +1,11 @@
 {
-  "tag" : {
-    "title"  : "izanai",
-    "artist" : "a_hisa",
-    "editor" : "goe×Cah-m"
+  "music" : {
+    "title"      : "izanai",
+    "artist"     : "a_hisa",
+    "noteeditor" : "goe×Cah-m"
   },
-  "music"  : "//kuroclef.honifuwa.com/rhythmgame/izanai/music.mp3",
-  "sheet"  : "dos.txt",
+  "sound"     : "//kuroclef.honifuwa.com/rhythmgame/izanai/music.mp3",
+  "notechart" : "dos.txt",
   "option" : {
     "speed"    : 2.5,
     "keybinds" : "sdf jkl",
