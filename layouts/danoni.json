@@ -52,17 +52,17 @@
   },
   "result" : {
     "text" : [
-      [ { "font" : "300 48px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Game Clear!", 175,  80 ] ],
-      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#ff0", "textAlign" : "left"   }, [ "Cool",         60, 160 ] ],
-      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#0ff", "textAlign" : "left"   }, [ "Great",        60, 200 ] ],
-      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#33f", "textAlign" : "left"   }, [ "Good",         60, 240 ] ],
-      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#f33", "textAlign" : "left"   }, [ "Bad",          60, 280 ] ],
-      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#fff", "textAlign" : "left"   }, [ "Score",        50, 360 ] ],
-      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#ff0", "textAlign" : "right"  }, [ "__COOL__",    290, 160 ] ],
-      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#0ff", "textAlign" : "right"  }, [ "__GREAT__",   290, 200 ] ],
-      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#33f", "textAlign" : "right"  }, [ "__GOOD__",    290, 240 ] ],
-      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#f33", "textAlign" : "right"  }, [ "__BAD__",     290, 280 ] ],
-      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#fff", "textAlign" : "right"  }, [ "__SCORE__",   300, 360 ] ]
+      [ { "font" : "300 48px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Game Clear!", 300, 120 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#ff0", "textAlign" : "left"   }, [ "Cool",        185, 200 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#0ff", "textAlign" : "left"   }, [ "Great",       185, 240 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#33f", "textAlign" : "left"   }, [ "Good",        185, 280 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#f33", "textAlign" : "left"   }, [ "Bad",         185, 320 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#fff", "textAlign" : "left"   }, [ "Score",       175, 400 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#ff0", "textAlign" : "right"  }, [ "__COOL__",    415, 200 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#0ff", "textAlign" : "right"  }, [ "__GREAT__",   415, 240 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#33f", "textAlign" : "right"  }, [ "__GOOD__",    415, 280 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#f33", "textAlign" : "right"  }, [ "__BAD__",     415, 320 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#fff", "textAlign" : "right"  }, [ "__SCORE__",   425, 400 ] ]
     ]
   }
 }

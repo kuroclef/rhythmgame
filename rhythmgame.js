@@ -27,17 +27,19 @@
     BACKGROUND : 0,
     JUDGELINE  : 1,
     CONTAINER  : 2,
-    TEXTEFFECT : 3
+    TEXTEFFECT : 3,
+    length     : 4
   })
 
   /**
    * Enumeration of Judge
    */
   const Judge = Object.freeze({
-    COOL  : 1,
-    GREAT : 2,
-    GOOD  : 3,
-    BAD   : 0
+    BAD    : 0,
+    COOL   : 1,
+    GREAT  : 2,
+    GOOD   : 3,
+    length : 4
   })
 
   /**
@@ -246,14 +248,14 @@
     prepare_stage() {
       const container = document.querySelector(`div#stage`)
       Object.assign(container.style, layout.stage)
-      return [ ...Array(2) ].map((_, i) => {
+      return [ ...Array(Layer.length) ].map((_, i) => {
         const canvas  = document.createElement(`canvas`)
         canvas.width  = parseInt(container.style.width)
         canvas.height = parseInt(container.style.height)
         container.appendChild(canvas)
         return Object.assign(canvas.getContext(`2d`), {
           font         : `300 48px Open Sans`,
-          textAlign    : [ `left`, `center` ][i],
+          textAlign    : `center`,
           textBaseline : `middle`
         })
       })
@@ -296,7 +298,6 @@
    */
   class Driver {
     parse(notechart) {}
-    prepare(notechart) {}
     calc_judgetime(note, player, moment) {}
     calc_judgetimeln(note, player, moment) {}
   }
@@ -314,10 +315,10 @@
         if (v.includes(`=`)) return v.split(`=`)
                              return v
       }))).map(([ k, v ]) => [ ...k, v ])
-      return this.prepare(chart)
+      return this._prepare(chart)
     }
 
-    prepare(notechart) {
+    _prepare(notechart) {
       let   offset = 0
       const chart  = notechart.reduce((acc, [ k, v ]) => {
         switch (k) {
@@ -392,10 +393,10 @@
       const chart = notechart.split(/[\n\r\&]+/).filter(line => {
         return /.=./.test(line)
       }).map(v => v.split(`=`).map(v => v.split(`,`))).map(([ k, v ]) => [ ...k, v ])
-      return this.prepare(chart)
+      return this._prepare(chart)
     }
 
-    prepare(notechart) {
+    _prepare(notechart) {
       const chart = notechart.reduce((acc, [ k, v ]) => {
         switch (k) {
         case `left_data` :
@@ -529,12 +530,12 @@
     setup() {
       this.layout = JSON.parse(JSON.stringify(layout[this.constructor.name.toLowerCase()]))
       this.expand(this.layout).forEach(text => {
-        Object.assign(stage[0], text[0])
-        stage[0].fillText(...text[1])
+        Object.assign(stage[Layer.CONTAINER], text[0])
+        stage[Layer.CONTAINER].fillText(...text[1])
       })
     }
 
-    expand(layout) { }
+    expand(layout) {}
     update(tick) {}
     render(tick) {}
     onkeydown(event) {}
@@ -682,7 +683,7 @@
       this._clear(stage)
 
       notechart.lanes.forEach((lane, i) => {
-        stage[0].fillStyle = this.layout.lane.color[i]
+        stage[Layer.CONTAINER].fillStyle = this.layout.lane.color[i]
 
         for (let j = 0; j < lane.length; j++) {
           const note = lane.at(j)
@@ -703,47 +704,47 @@
       })
 
       const rect = [ this.layout.lane.x[0], target_y, this.layout.lane.target[2], this.layout.lane.target[3] ]
-      stage[0].globalCompositeOperation = `destination-over`
-      drawImage(stage[0], sprite, ...this.layout.lane.target, this.layout.lane.x[0], target_y)
-      stage[0].globalCompositeOperation = `source-over`
+      stage[Layer.CONTAINER].globalCompositeOperation = `destination-over`
+      drawImage(stage[Layer.CONTAINER], sprite, ...this.layout.lane.target, this.layout.lane.x[0], target_y)
+      stage[Layer.CONTAINER].globalCompositeOperation = `source-over`
       this._buffer.push(rect)
     }
 
     _blit(sprite, y, i, stage) {
       const rect = [ this.layout.lane.x[i], y, this.layout.lane.face[i][2], this.layout.lane.face[i][3] ]
-      drawImage(stage[0], sprite, ...this.layout.lane.face[i], this.layout.lane.x[i], y)
-      stage[0].globalCompositeOperation = `source-atop`
-      stage[0].fillRect(...rect)
-      stage[0].globalCompositeOperation = `source-over`
+      drawImage(stage[Layer.CONTAINER], sprite, ...this.layout.lane.face[i], this.layout.lane.x[i], y)
+      stage[Layer.CONTAINER].globalCompositeOperation = `source-atop`
+      stage[Layer.CONTAINER].fillRect(...rect)
+      stage[Layer.CONTAINER].globalCompositeOperation = `source-over`
       this._buffer.push(rect)
     }
 
     _blit_bar(sprite, y1, y2, i, stage) {
       const _y2  = y2 + this.layout.lane.face_alpha[i][3] / 2
       const rect = [ this.layout.lane.x[i], _y2, this.layout.lane.face_alpha[i][2], y1 - y2]
-      stage[0].drawImage(sprite, ...this.layout.lane.bar[i], this.layout.lane.x[i], _y2, this.layout.lane.bar[i][2], y1 - y2)
-      stage[0].globalCompositeOperation = `source-atop`
-      stage[0].fillRect(...rect)
-      stage[0].globalCompositeOperation = `destination-out`
-      drawImage(stage[0], sprite, ...this.layout.lane.face_alpha[i], this.layout.lane.x[i], y1)
-      drawImage(stage[0], sprite, ...this.layout.lane.face_alpha[i], this.layout.lane.x[i], y2)
-      stage[0].globalCompositeOperation = `source-over`
+      stage[Layer.CONTAINER].drawImage(sprite, ...this.layout.lane.bar[i], this.layout.lane.x[i], _y2, this.layout.lane.bar[i][2], y1 - y2)
+      stage[Layer.CONTAINER].globalCompositeOperation = `source-atop`
+      stage[Layer.CONTAINER].fillRect(...rect)
+      stage[Layer.CONTAINER].globalCompositeOperation = `destination-out`
+      drawImage(stage[Layer.CONTAINER], sprite, ...this.layout.lane.face_alpha[i], this.layout.lane.x[i], y1)
+      drawImage(stage[Layer.CONTAINER], sprite, ...this.layout.lane.face_alpha[i], this.layout.lane.x[i], y2)
+      stage[Layer.CONTAINER].globalCompositeOperation = `source-over`
       this._buffer.push(rect)
     }
 
     _clear(stage) {
       for (let i = 0; i < this._buffer.length; i++) {
-        stage[0].clearRect(...this._buffer.at(i))
+        stage[Layer.CONTAINER].clearRect(...this._buffer.at(i))
       }
       this._buffer.clear()
     }
 
     _draw_combo() {
-      stage[1].fillStyle = this.layout.judge.color[this.player.state_judge]
-      stage[1].clearRect(0, stage[1].canvas.height / 2 - 24, stage[1].canvas.width, 48)
+      stage[Layer.TEXTEFFECT].fillStyle = this.layout.judge.color[this.player.state_judge]
+      stage[Layer.TEXTEFFECT].clearRect(0, stage[Layer.TEXTEFFECT].canvas.height / 2 - 24, stage[Layer.TEXTEFFECT].canvas.width, 48)
 
       if (this.player.state_judge === 0) return
-      stage[1].fillText(this.player.score.combo, stage[1].canvas.width / 2, stage[1].canvas.height / 2)
+      stage[Layer.TEXTEFFECT].fillText(this.player.score.combo, stage[Layer.TEXTEFFECT].canvas.width / 2, stage[Layer.TEXTEFFECT].canvas.height / 2)
     }
 
     onkeydown(event) {
@@ -807,7 +808,7 @@
   const rhythmgame = new Rhythmgame()
   const profile    = document.querySelector(`script#rhythmgame`).getAttribute(`name`)
 
-  const { music, sound, notechart, option, layout, sprite } = await rhythmgame.fetch(`${_profile}/settings.json`)
+  const { music, sound, notechart, option, layout, sprite } = await rhythmgame.fetch(`${profile}/settings.json`)
 
   const stage = rhythmgame.prepare_stage()
 
