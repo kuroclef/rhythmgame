@@ -208,11 +208,7 @@
       case `ogg` : case `mp3` :
         return fetch(url)
           .then(response => response.blob())
-          .then(blob => {
-            const audio = new Audio()
-            audio.src   = URL.createObjectURL(blob)
-            return audio
-          })
+          .then(blob => new Audio(URL.createObjectURL(blob)))
 
       case `ssc` :
         return fetch(url)
