@@ -27,8 +27,7 @@
     BACKGROUND : 0,
     JUDGELINE  : 1,
     CONTAINER  : 2,
-    TEXTEFFECT : 3,
-    length     : 4
+    TEXTEFFECT : 3
   })
 
   /**
@@ -38,8 +37,7 @@
     BAD    : 0,
     COOL   : 1,
     GREAT  : 2,
-    GOOD   : 3,
-    length : 4
+    GOOD   : 3
   })
 
   /**
@@ -244,7 +242,7 @@
     prepare_stage() {
       const container = document.querySelector(`div#stage`)
       Object.assign(container.style, layout.stage)
-      return [ ...Array(Layer.length) ].map((_, i) => {
+      return Object.keys(Layer).map((_, i) => {
         const canvas  = document.createElement(`canvas`)
         canvas.width  = parseInt(container.style.width)
         canvas.height = parseInt(container.style.height)
@@ -570,6 +568,8 @@
       this.player  = new Player(notechart.totalnotes)
       this._buffer = new Blitbuffer(notechart.totalnotes)
 
+      drawImage(stage[Layer.JUDGELINE], sprite, ...this.layout.lane.target, this.layout.lane.x[0], this.layout.lane.target_y)
+
       sound.currentTime = 0
       sound.play()
       sound.addEventListener(`ended`, () => { this.player.gameover = true }, { once : true })
@@ -674,9 +674,8 @@
     }
 
     render(tick) {
-      const height   = this.layout.lane.height
-      const target_y = height - this.layout.lane.face[0][3] / 2
-      this._clear(stage)
+      const height = this.layout.lane.height
+      this._clear()
 
       notechart.lanes.forEach((lane, i) => {
         stage[Layer.CONTAINER].fillStyle = this.layout.lane.color[i]
@@ -685,28 +684,22 @@
           const note = lane.at(j)
           if (note.time > this.player.time + note.lifetime) continue
 
-          const y = Math.min(target_y, Math.trunc(height * option.speed * (this.player.time - note.time) / note.lifetime + target_y))
+          const y = Math.min(this.layout.lane.target_y, Math.trunc(height * option.speed * (this.player.time - note.time) / note.lifetime + this.layout.lane.target_y))
 
           if (note.timeln === 0) {
-            this._blit(sprite, y, i, stage)
+            this._blit(y, i)
             continue
           }
 
-          const y2 = Math.min(target_y, Math.trunc(height * option.speed * (this.player.time - note.timeln) / note.lifetime + target_y))
-          this._blit_bar(sprite, y, y2, i, stage)
-          this._blit(sprite, y,  i, stage)
-          this._blit(sprite, y2, i, stage)
+          const y2 = Math.min(this.layout.lane.target_y, Math.trunc(height * option.speed * (this.player.time - note.timeln) / note.lifetime + this.layout.lane.target_y))
+          this._blit_bar(y, y2, i)
+          this._blit(y,  i)
+          this._blit(y2, i)
         }
       })
-
-      const rect = [ this.layout.lane.x[0], target_y, this.layout.lane.target[2], this.layout.lane.target[3] ]
-      stage[Layer.CONTAINER].globalCompositeOperation = `destination-over`
-      drawImage(stage[Layer.CONTAINER], sprite, ...this.layout.lane.target, this.layout.lane.x[0], target_y)
-      stage[Layer.CONTAINER].globalCompositeOperation = `source-over`
-      this._buffer.push(rect)
     }
 
-    _blit(sprite, y, i, stage) {
+    _blit(y, i) {
       const rect = [ this.layout.lane.x[i], y, this.layout.lane.face[i][2], this.layout.lane.face[i][3] ]
       drawImage(stage[Layer.CONTAINER], sprite, ...this.layout.lane.face[i], this.layout.lane.x[i], y)
       stage[Layer.CONTAINER].globalCompositeOperation = `source-atop`
@@ -715,7 +708,7 @@
       this._buffer.push(rect)
     }
 
-    _blit_bar(sprite, y1, y2, i, stage) {
+    _blit_bar(y1, y2, i) {
       const _y2  = y2 + this.layout.lane.face_alpha[i][3] / 2
       const rect = [ this.layout.lane.x[i], _y2, this.layout.lane.face_alpha[i][2], y1 - y2]
       stage[Layer.CONTAINER].drawImage(sprite, ...this.layout.lane.bar[i], this.layout.lane.x[i], _y2, this.layout.lane.bar[i][2], y1 - y2)
@@ -728,7 +721,7 @@
       this._buffer.push(rect)
     }
 
-    _clear(stage) {
+    _clear() {
       for (let i = 0; i < this._buffer.length; i++) {
         stage[Layer.CONTAINER].clearRect(...this._buffer.at(i))
       }
@@ -791,10 +784,10 @@
 
     expand(layout) {
       layout.text.forEach(text => {
-        text[1][0] = text[1][0].replace(`__COOL__`,  this.score.judges[Judge.COOL])
+        text[1][0] = text[1][0].replace(`__COOL__` , this.score.judges[Judge.COOL])
         text[1][0] = text[1][0].replace(`__GREAT__`, this.score.judges[Judge.GREAT])
-        text[1][0] = text[1][0].replace(`__GOOD__`,  this.score.judges[Judge.GOOD])
-        text[1][0] = text[1][0].replace(`__BAD__`,   this.score.judges[Judge.BAD])
+        text[1][0] = text[1][0].replace(`__GOOD__` , this.score.judges[Judge.GOOD])
+        text[1][0] = text[1][0].replace(`__BAD__`  , this.score.judges[Judge.BAD])
         text[1][0] = text[1][0].replace(`__SCORE__`, this.score.point)
       })
       return layout.text
