@@ -568,7 +568,7 @@
       this.player  = new Player(notechart.totalnotes)
       this._buffer = new Blitbuffer(notechart.totalnotes)
 
-      drawImage(stage[Layer.JUDGELINE], sprite, ...this.layout.lane.target, this.layout.lane.x[0], this.layout.lane.target_y)
+      drawImage(stage[Layer.JUDGELINE], sprite, ...this.layout.lane.target_line)
 
       sound.currentTime = 0
       sound.play()
@@ -674,7 +674,8 @@
     }
 
     render(tick) {
-      const height = this.layout.lane.height
+      const height   = this.layout.lane.height
+      const target_y = this.layout.lane.target_line[5]
       this._clear()
 
       notechart.lanes.forEach((lane, i) => {
@@ -684,14 +685,14 @@
           const note = lane.at(j)
           if (note.time > this.player.time + note.lifetime) continue
 
-          const y = Math.min(this.layout.lane.target_y, Math.trunc(height * option.speed * (this.player.time - note.time) / note.lifetime + this.layout.lane.target_y))
+          const y = Math.min(target_y, Math.trunc(height * option.speed * (this.player.time - note.time) / note.lifetime + target_y))
 
           if (note.timeln === 0) {
             this._blit(y, i)
             continue
           }
 
-          const y2 = Math.min(this.layout.lane.target_y, Math.trunc(height * option.speed * (this.player.time - note.timeln) / note.lifetime + this.layout.lane.target_y))
+          const y2 = Math.min(target_y, Math.trunc(height * option.speed * (this.player.time - note.timeln) / note.lifetime + target_y))
           this._blit_bar(y, y2, i)
           this._blit(y,  i)
           this._blit(y2, i)
@@ -700,8 +701,8 @@
     }
 
     _blit(y, i) {
-      const rect = [ this.layout.lane.x[i], y, this.layout.lane.face[i][2], this.layout.lane.face[i][3] ]
-      drawImage(stage[Layer.CONTAINER], sprite, ...this.layout.lane.face[i], this.layout.lane.x[i], y)
+      const rect = [ this.layout.lane.face[i][4], y, this.layout.lane.face[i][2], this.layout.lane.face[i][3] ]
+      drawImage(stage[Layer.CONTAINER], sprite, ...this.layout.lane.face[i], y)
       stage[Layer.CONTAINER].globalCompositeOperation = `source-atop`
       stage[Layer.CONTAINER].fillRect(...rect)
       stage[Layer.CONTAINER].globalCompositeOperation = `source-over`
@@ -710,13 +711,13 @@
 
     _blit_bar(y1, y2, i) {
       const _y2  = y2 + this.layout.lane.face_alpha[i][3] / 2
-      const rect = [ this.layout.lane.x[i], _y2, this.layout.lane.face_alpha[i][2], y1 - y2]
-      stage[Layer.CONTAINER].drawImage(sprite, ...this.layout.lane.bar[i], this.layout.lane.x[i], _y2, this.layout.lane.bar[i][2], y1 - y2)
+      const rect = [ this.layout.lane.face_alpha[i][4], _y2, this.layout.lane.face_alpha[i][2], y1 - y2]
+      stage[Layer.CONTAINER].drawImage(sprite, ...this.layout.lane.bar[i], _y2, this.layout.lane.bar[i][2], y1 - y2)
       stage[Layer.CONTAINER].globalCompositeOperation = `source-atop`
       stage[Layer.CONTAINER].fillRect(...rect)
       stage[Layer.CONTAINER].globalCompositeOperation = `destination-out`
-      drawImage(stage[Layer.CONTAINER], sprite, ...this.layout.lane.face_alpha[i], this.layout.lane.x[i], y1)
-      drawImage(stage[Layer.CONTAINER], sprite, ...this.layout.lane.face_alpha[i], this.layout.lane.x[i], y2)
+      drawImage(stage[Layer.CONTAINER], sprite, ...this.layout.lane.face_alpha[i], y1)
+      drawImage(stage[Layer.CONTAINER], sprite, ...this.layout.lane.face_alpha[i], y2)
       stage[Layer.CONTAINER].globalCompositeOperation = `source-over`
       this._buffer.push(rect)
     }
