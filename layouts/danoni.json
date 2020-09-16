@@ -1,12 +1,12 @@
 {
   "stage" : {
     "width"      : "600px",
-    "height"     : "500px",
+    "height"     : "450px",
     "background" : "#111"
   },
   "game" : {
     "lane" : {
-      "height" : 430,
+      "height" : 400,
       "color"  : [ "#ccc", "#33f", "#ccc", "#fff", "#ccc", "#33f", "#ccc" ],
       "face" : [
         [   0,  0, 48, 48, 116 ],
@@ -44,7 +44,7 @@
         [ 272, 244, 48, 48, 388 ],
         [ 320, 244, 48, 48, 436 ]
       ],
-      "target_line" : [ 0, 196, 368, 48, 116, 406 ]
+      "target_line" : [ 0, 196, 368, 48, 116, 376 ]
     },
     "judge" : {
       "color" : [ "#f00", "#ff0", "#0ff", "#33f" ]
@@ -52,25 +52,25 @@
   },
   "title" : {
     "text" : [
-      [ { "font" : "300 48px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Dancing☆Onigiri", 300, 100 ] ],
-      [ { "font" : "300 80px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "__TITLE__",       300, 250 ] ],
-      [ { "font" : "300 48px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Press Enter",     300, 400 ] ],
-      [ { "font" : "300 24px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Maker : __EDITOR__　Music : __ARTIST__", 300, 480 ] ]
+      [ { "font" : "300 48px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Dancing☆Onigiri", 300,  70 ] ],
+      [ { "font" : "300 80px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "__TITLE__"      , 300, 225 ] ],
+      [ { "font" : "300 48px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Press Enter"    , 300, 380 ] ],
+      [ { "font" : "300 24px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Maker : __EDITOR__　Music : __ARTIST__", 300, 430 ] ]
     ]
   },
   "result" : {
     "text" : [
-      [ { "font" : "300 48px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Game Clear!", 300, 120 ] ],
-      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#ff0", "textAlign" : "left"   }, [ "Cool",        185, 200 ] ],
-      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#0ff", "textAlign" : "left"   }, [ "Great",       185, 240 ] ],
-      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#33f", "textAlign" : "left"   }, [ "Good",        185, 280 ] ],
-      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#f33", "textAlign" : "left"   }, [ "Bad",         185, 320 ] ],
-      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#fff", "textAlign" : "left"   }, [ "Score",       175, 400 ] ],
-      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#ff0", "textAlign" : "right"  }, [ "__COOL__",    415, 200 ] ],
-      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#0ff", "textAlign" : "right"  }, [ "__GREAT__",   415, 240 ] ],
-      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#33f", "textAlign" : "right"  }, [ "__GOOD__",    415, 280 ] ],
-      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#f33", "textAlign" : "right"  }, [ "__BAD__",     415, 320 ] ],
-      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#fff", "textAlign" : "right"  }, [ "__SCORE__",   425, 400 ] ]
+      [ { "font" : "300 48px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Game Clear!", 300,  70 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#ff0", "textAlign" : "left"   }, [ "(･∀･)ｲｲ!!"  , 150, 160 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#0ff", "textAlign" : "left"   }, [ "(`･ω･)ｼｬｷﾝ!", 150, 200 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#33f", "textAlign" : "left"   }, [ "(´∀`)ﾏﾀｰﾘ"  , 150, 240 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#f33", "textAlign" : "left"   }, [ "(･ω･`)ｼｮﾎﾞﾝ", 150, 280 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#fff", "textAlign" : "left"   }, [ "Score",       175, 380 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#ff0", "textAlign" : "right"  }, [ "__COOL__",    450, 160 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#0ff", "textAlign" : "right"  }, [ "__GREAT__",   450, 200 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#33f", "textAlign" : "right"  }, [ "__GOOD__",    450, 240 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#f33", "textAlign" : "right"  }, [ "__BAD__",     450, 280 ] ],
+      [ { "font" : "300 36px 'Open Sans', 'M PLUS 1p', sans-serif", "fillStyle" : "#fff", "textAlign" : "right"  }, [ "__SCORE__",   425, 380 ] ]
     ]
   }
 }
