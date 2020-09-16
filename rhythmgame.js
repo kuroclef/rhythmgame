@@ -143,9 +143,9 @@
   class Buffer extends Array {}
 
   /**
-   * Structure of Blitbuffer [ Buffer ... ]
+   * Structure of Drawbuffer [ Buffer ... ]
    */
-  class Blitbuffer {
+  class Drawbuffer {
     constructor(length) {
       this._buffer = [ ...new Buffer(length) ]
       this.length  = 0
@@ -566,7 +566,7 @@
     setup() {
       this.layout  = JSON.parse(JSON.stringify(layout[this.constructor.name.toLowerCase()]))
       this.player  = new Player(notechart.totalnotes)
-      this._buffer = new Blitbuffer(notechart.totalnotes)
+      this._buffer = new Drawbuffer(notechart.totalnotes)
 
       drawImage(stage[Layer.JUDGELINE], sprite, ...this.layout.lane.target_line)
 
@@ -634,7 +634,7 @@
         return
       }
 
-      this._calculate(judge)
+      this._calculate(judge, index)
       lane.shift()
     }
 
@@ -647,18 +647,22 @@
       }
 
       const time = rhythmgame.driver.calc_judgetimeln(lane.at(0), this.player, notechart.timeline.at(0))
-      if (time > 0) return
+      if (time > 0) {
+        requestAnimationFrame(() => this._draw_flash(index))
+        return
+      }
 
-      this._calculate(this.player.state_lnjudges[index])
+      this._calculate(this.player.state_lnjudges[index], index)
       this.player.state_lnjudges[index] = 0
       lane.shift()
     }
 
-    _calculate(judge) {
+    _calculate(judge, i) {
       this.player.score.judges[judge]++
       this.player.score.combo++
       this.player.state_judge = judge
       requestAnimationFrame(() => this._draw_combo())
+      requestAnimationFrame(() => this._draw_flash(i))
     }
 
     _calcreset() {
@@ -688,19 +692,19 @@
           const y = Math.min(target_y, Math.trunc(height * option.speed * (this.player.time - note.time) / note.lifetime + target_y))
 
           if (note.timeln === 0) {
-            this._blit(y, i)
+            this._draw(y, i)
             continue
           }
 
           const y2 = Math.min(target_y, Math.trunc(height * option.speed * (this.player.time - note.timeln) / note.lifetime + target_y))
-          this._blit_bar(y, y2, i)
-          this._blit(y,  i)
-          this._blit(y2, i)
+          this._draw_bar(y, y2, i)
+          this._draw(y,  i)
+          this._draw(y2, i)
         }
       })
     }
 
-    _blit(y, i) {
+    _draw(y, i) {
       const rect = [ this.layout.lane.face[i][4], y, this.layout.lane.face[i][2], this.layout.lane.face[i][3] ]
       drawImage(stage[Layer.CONTAINER], sprite, ...this.layout.lane.face[i], y)
       stage[Layer.CONTAINER].globalCompositeOperation = `source-atop`
@@ -709,7 +713,7 @@
       this._buffer.push(rect)
     }
 
-    _blit_bar(y1, y2, i) {
+    _draw_bar(y1, y2, i) {
       const _y2  = y2 + this.layout.lane.face_alpha[i][3] / 2
       const rect = [ this.layout.lane.face_alpha[i][4], _y2, this.layout.lane.face_alpha[i][2], y1 - y2]
       stage[Layer.CONTAINER].drawImage(sprite, ...this.layout.lane.bar[i], _y2, this.layout.lane.bar[i][2], y1 - y2)
@@ -720,6 +724,13 @@
       drawImage(stage[Layer.CONTAINER], sprite, ...this.layout.lane.face_alpha[i], y2)
       stage[Layer.CONTAINER].globalCompositeOperation = `source-over`
       this._buffer.push(rect)
+    }
+
+    _draw_flash(i) {
+      const y    = this.layout.lane.target_line[5]
+      const rect = [ this.layout.lane.flash[i][4], y, this.layout.lane.flash[i][2], this.layout.lane.flash[i][3] ]
+      drawImage(stage[Layer.TEXTEFFECT], sprite, ...this.layout.lane.flash[i], y)
+      setTimeout(() => stage[Layer.TEXTEFFECT].clearRect(...rect), 50)
     }
 
     _clear() {
