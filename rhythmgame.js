@@ -190,9 +190,9 @@
     fetch(url) {
       if (typeof url === `object`) return this._proc(url)
       if (typeof url !== `string`) return url
-      if (!url.includes(`.`))      return url
+      if (!url.includes`.`)        return url
 
-      const suffix = url.slice(url.lastIndexOf(`.`) + 1)
+      const suffix = url.slice(url.lastIndexOf`.` + 1)
       switch (suffix) {
       case `png` :
         return fetch(url)
@@ -240,14 +240,14 @@
     }
 
     prepare_stage() {
-      const container = document.querySelector(`div#stage`)
+      const container = document.querySelector`div#stage`
       Object.assign(container.style, layout.stage)
       return Object.keys(Layer).map((_, i) => {
-        const canvas  = document.createElement(`canvas`)
+        const canvas  = document.createElement`canvas`
         canvas.width  = parseInt(container.style.width)
         canvas.height = parseInt(container.style.height)
         container.appendChild(canvas)
-        return Object.assign(canvas.getContext(`2d`), {
+        return Object.assign(canvas.getContext`2d`, {
           font         : `300 48px Open Sans`,
           textAlign    : `center`,
           textBaseline : `middle`
@@ -302,12 +302,12 @@
   class StepMania extends Driver {
     parse(notechart) {
       const chart = notechart.split(/[\n\r]+/).reduce((acc, line) => {
-        if (line.includes(`,  //`)) return `${acc},`
-        if (line.includes(`//`))    return `${acc}`
-                                    return `${acc}${line}`
-      }).split(`;`).map(v => v.split(`:`).map(v => v.split(`,`).map(v => {
-        if (v.includes(`=`)) return v.split(`=`)
-                             return v
+        if (line.includes`,  //`) return `${acc},`
+        if (line.includes`//`)    return `${acc}`
+                                  return `${acc}${line}`
+      }).split`;`.map(v => v.split`:`.map(v => v.split`,`.map(v => {
+        if (v.includes`=`) return v.split`=`
+                           return v
       }))).map(([ k, v ]) => [ ...k, v ])
       return this._prepare(chart)
     }
@@ -353,7 +353,7 @@
     }
 
     _prepare_lanes(lanes, measure, i) {
-      [].forEach.call(measure, (note, j) => {
+      [ ...measure ].forEach((note, j) => {
         const lane = j % 8
         const beat = (i + (j - lane) / measure.length) * 4
         switch (note) {
@@ -386,7 +386,7 @@
     parse(notechart) {
       const chart = notechart.split(/[\n\r\&]+/).filter(line => {
         return /.=./.test(line)
-      }).map(v => v.split(`=`).map(v => v.split(`,`))).map(([ k, v ]) => [ ...k, v ])
+      }).map(v => v.split`=`.map(v => v.split`,`)).map(([ k, v ]) => [ ...k, v ])
       return this._prepare(chart)
     }
 
@@ -769,7 +769,7 @@
 
       if (option.autoplay) return
 
-      [].forEach.call(option.keybinds, (key, i) => {
+      [ ...option.keybinds ].forEach((key, i) => {
         if (event.key !== key) return
         this.player.state_inputs[i] = true
         this._judge(notechart.lanes[i], i)
@@ -778,7 +778,7 @@
 
     onkeyup(event) {
       if (option.autoplay) return
-      [].forEach.call(option.keybinds, (key, i) => {
+      [ ...option.keybinds ].forEach((key, i) => {
         if (event.key !== key) return
         this.player.state_inputs[i] = false
       })
@@ -807,7 +807,7 @@
   }
 
   const rhythmgame = new Rhythmgame()
-  const profile    = document.querySelector(`script#rhythmgame`).getAttribute(`name`)
+  const profile    = document.querySelector`script#rhythmgame`.getAttribute`name`
 
   const { music, sound, notechart, option, layout, sprite } = await rhythmgame.fetch(`${profile}/settings.json`)
 
