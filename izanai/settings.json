@@ -5,12 +5,12 @@
     "noteeditor" : "goe×Cah-m"
   },
   "sound"     : "//kuroclef.honifuwa.com/rhythmgame/izanai/music.mp3",
-  "notechart" : "dos.txt",
+  "notechart" : "/rhythmgame/izanai/dos.txt",
   "option" : {
     "speed"    : 2.5,
     "keybinds" : "sdf jkl",
     "autoplay" : true
   },
-  "layout" : "../layouts/danoni.json",
-  "sprite" : "../sprites/danoni.png"
+  "layout" : "/rhythmgame/layouts/danoni.json",
+  "sprite" : "/rhythmgame/sprites/danoni.png"
 }
