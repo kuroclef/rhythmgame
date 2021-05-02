@@ -187,67 +187,75 @@
    * Rhythmgame
    */
   class Rhythmgame {
-    fetch(url) {
+    async load() {
+      const profile_name = profile.getAttribute(`name`)
+      Object.assign(this, await this._fetch(`${profile_name}/settings.json`))
+    }
+
+    _fetch(url) {
       if (typeof url === `object`) return this._proc(url)
       if (typeof url !== `string`) return url
-      if (!url.includes`.`)        return url
+      if (!url.includes(`.`))      return url
 
-      const suffix = url.slice(url.lastIndexOf`.` + 1)
+      const suffix = url.slice(url.lastIndexOf(`.`) + 1)
       switch (suffix) {
-      case `png` :
-        return fetch(url)
-          .then(response => response.blob())
-          .then(blob => {
-            const image = new Image()
-            image.src   = URL.createObjectURL(blob)
-            return image
-          })
+        case `png` :
+          return fetch(url)
+            .then(response => response.blob())
+            .then(blob => {
+              const image = new Image()
+              image.src   = URL.createObjectURL(blob)
+              return image
+            })
 
-      case `ogg` : case `mp3` :
-        return fetch(url)
-          .then(response => response.blob())
-          .then(blob => new Audio(URL.createObjectURL(blob)))
+        case `ogg` : case `mp3` :
+          return fetch(url)
+            .then(response => response.blob())
+            .then(blob => new Audio(URL.createObjectURL(blob)))
 
-      case `ssc` :
-        return fetch(url)
-          .then(response => response.text())
-          .then(text => this._parse(new StepMania(), text))
+        case `ssc` :
+          return fetch(url)
+            .then(response => response.text())
+            .then(text => this._parse(new StepMania(), text))
 
-      case `txt` :
-        return fetch(url)
-          .then(response => response.text())
-          .then(text => this._parse(new DancingOnigiri(), text))
+        case `txt` :
+          return fetch(url)
+            .then(response => response.text())
+            .then(text => this._parse(new DancingOnigiri(), text))
 
-      case `json` :
-        return fetch(url)
-          .then(response => response.json())
-          .then(json => this._proc(json))
+        case `json` :
+          return fetch(url)
+            .then(response => response.json())
+            .then(json => this._proc(json))
 
-      default :
-        return url
+        default :
+          return url
       }
     }
 
     async _proc(settings) {
       const s = Object.entries(settings)
-      for (const [ k, v ] of s) settings[k] = await this.fetch(v)
+      for (const [ k, v ] of s) settings[k] = await this._fetch(v)
       return settings
     }
 
     _parse(driver, notechart) {
-      rhythmgame.driver = driver
+      this.driver = driver
       return driver.parse(notechart)
     }
 
-    prepare_stage() {
-      const container = document.querySelector`div#stage`
-      Object.assign(container.style, layout.stage)
+    build() {
+      this.stage = this._prepare_stage()
+    }
+
+    _prepare_stage() {
+      Object.assign(container.style, this.layout.stage)
       return Object.keys(Layer).map((_, i) => {
-        const canvas  = document.createElement`canvas`
+        const canvas  = document.createElement(`canvas`)
         canvas.width  = parseInt(container.style.width)
         canvas.height = parseInt(container.style.height)
         container.appendChild(canvas)
-        return Object.assign(canvas.getContext`2d`, {
+        return Object.assign(canvas.getContext(`2d`), {
           font         : `300 48px Open Sans`,
           textAlign    : `center`,
           textBaseline : `middle`
@@ -256,9 +264,9 @@
     }
 
     setup(scene) {
-      stage.forEach(layer => layer.clearRect(0, 0, layer.canvas.width, layer.canvas.height))
+      this.stage.forEach(layer => layer.clearRect(0, 0, layer.canvas.width, layer.canvas.height))
       this.scene = scene
-      this.scene.setup()
+      this.scene.setup(this)
     }
 
     start() {
@@ -302,12 +310,12 @@
   class StepMania extends Driver {
     parse(notechart) {
       const chart = notechart.split(/[\n\r]+/).reduce((acc, line) => {
-        if (line.includes`,  //`) return `${acc},`
-        if (line.includes`//`)    return `${acc}`
-                                  return `${acc}${line}`
-      }).split`;`.map(v => v.split`:`.map(v => v.split`,`.map(v => {
-        if (v.includes`=`) return v.split`=`
-                           return v
+        if (line.includes(`,  //`)) return `${acc},`
+        if (line.includes(`//`))    return `${acc}`
+        return `${acc}${line}`
+      }).split(`;`).map(v => v.split(`:`).map(v => v.split(`,`).map(v => {
+        if (v.includes(`=`)) return v.split(`=`)
+        return v
       }))).map(([ k, v ]) => [ ...k, v ])
       return this._prepare(chart)
     }
@@ -316,19 +324,19 @@
       let   offset = 0
       const chart  = notechart.reduce((acc, [ k, v ]) => {
         switch (k) {
-        case `#OFFSET` :
-          offset = v[0]
-          return acc
+          case `#OFFSET` :
+            offset = v[0]
+            return acc
 
-        case `#BPMS` :
-          acc.timeline.push(new Moment(-offset, 0, v[0][1] / 60, v[0][1]))
-          return { ...acc, timeline : v.reduce(this._prepare_timeline, acc.timeline) }
+          case `#BPMS` :
+            acc.timeline.push(new Moment(-offset, 0, v[0][1] / 60, v[0][1]))
+            return { ...acc, timeline : v.reduce(this._prepare_timeline, acc.timeline) }
 
-        case `#NOTES` :
-          return { ...acc, lanes : v.reduce(this._prepare_lanes, acc.lanes) }
+          case `#NOTES` :
+            return { ...acc, lanes : v.reduce(this._prepare_lanes, acc.lanes) }
 
-        default :
-          return acc
+          default :
+            return acc
         }
       }, {
         checkpoint : new Checkpoint(),
@@ -357,14 +365,14 @@
         const lane = j % 8
         const beat = (i + (j - lane) / measure.length) * 4
         switch (note) {
-        case `1` :
-          return lanes[lane].push(new Note(beat, 0, 5, 1))
+          case `1` :
+            return lanes[lane].push(new Note(beat, 0, 5, 1))
 
-        case `2` :
-          return lanes[lane].push(new Note(beat, 0, 5, 1))
+          case `2` :
+            return lanes[lane].push(new Note(beat, 0, 5, 1))
 
-        case `3` :
-          return lanes[lane].at_last().timeln = beat
+          case `3` :
+            return lanes[lane].at_last().timeln = beat
         }
       })
       return lanes
@@ -386,60 +394,60 @@
     parse(notechart) {
       const chart = notechart.split(/[\n\r\&]+/).filter(line => {
         return /.=./.test(line)
-      }).map(v => v.split`=`.map(v => v.split`,`)).map(([ k, v ]) => [ ...k, v ])
+      }).map(v => v.split(`=`).map(v => v.split(`,`))).map(([ k, v ]) => [ ...k, v ])
       return this._prepare(chart)
     }
 
     _prepare(notechart) {
       const chart = notechart.reduce((acc, [ k, v ]) => {
         switch (k) {
-        case `left_data` :
-          return { ...acc, lanes : v.reduce(this._prepare_lanes.bind(this, 0), acc.lanes) }
+          case `left_data` :
+            return { ...acc, lanes : v.reduce(this._prepare_lanes.bind(this, 0), acc.lanes) }
 
-        case `leftdia_data` :
-          return { ...acc, lanes : v.reduce(this._prepare_lanes.bind(this, 1), acc.lanes) }
+          case `leftdia_data` :
+            return { ...acc, lanes : v.reduce(this._prepare_lanes.bind(this, 1), acc.lanes) }
 
-        case `down_data` :
-          return { ...acc, lanes : v.reduce(this._prepare_lanes.bind(this, 2), acc.lanes) }
+          case `down_data` :
+            return { ...acc, lanes : v.reduce(this._prepare_lanes.bind(this, 2), acc.lanes) }
 
-        case `space_data` :
-          return { ...acc, lanes : v.reduce(this._prepare_lanes.bind(this, 3), acc.lanes) }
+          case `space_data` :
+            return { ...acc, lanes : v.reduce(this._prepare_lanes.bind(this, 3), acc.lanes) }
 
-        case `up_data` :
-          return { ...acc, lanes : v.reduce(this._prepare_lanes.bind(this, 4), acc.lanes) }
+          case `up_data` :
+            return { ...acc, lanes : v.reduce(this._prepare_lanes.bind(this, 4), acc.lanes) }
 
-        case `rightdia_data` :
-          return { ...acc, lanes : v.reduce(this._prepare_lanes.bind(this, 5), acc.lanes) }
+          case `rightdia_data` :
+            return { ...acc, lanes : v.reduce(this._prepare_lanes.bind(this, 5), acc.lanes) }
 
-        case `right_data` :
-          return { ...acc, lanes : v.reduce(this._prepare_lanes.bind(this, 6), acc.lanes) }
+          case `right_data` :
+            return { ...acc, lanes : v.reduce(this._prepare_lanes.bind(this, 6), acc.lanes) }
 
-        case `frzLeft_data` :
-          return { ...acc, lanes : v.reduce(this._prepare_lanesln.bind(this, 0), acc.lanes) }
+          case `frzLeft_data` :
+            return { ...acc, lanes : v.reduce(this._prepare_lanesln.bind(this, 0), acc.lanes) }
 
-        case `frzLdia_data` :
-          return { ...acc, lanes : v.reduce(this._prepare_lanesln.bind(this, 1), acc.lanes) }
+          case `frzLdia_data` :
+            return { ...acc, lanes : v.reduce(this._prepare_lanesln.bind(this, 1), acc.lanes) }
 
-        case `frzDown_data` :
-          return { ...acc, lanes : v.reduce(this._prepare_lanesln.bind(this, 2), acc.lanes) }
+          case `frzDown_data` :
+            return { ...acc, lanes : v.reduce(this._prepare_lanesln.bind(this, 2), acc.lanes) }
 
-        case `frzSpace_data` :
-          return { ...acc, lanes : v.reduce(this._prepare_lanesln.bind(this, 3), acc.lanes) }
+          case `frzSpace_data` :
+            return { ...acc, lanes : v.reduce(this._prepare_lanesln.bind(this, 3), acc.lanes) }
 
-        case `frzUp_data` :
-          return { ...acc, lanes : v.reduce(this._prepare_lanesln.bind(this, 4), acc.lanes) }
+          case `frzUp_data` :
+            return { ...acc, lanes : v.reduce(this._prepare_lanesln.bind(this, 4), acc.lanes) }
 
-        case `frzRdia_data` :
-          return { ...acc, lanes : v.reduce(this._prepare_lanesln.bind(this, 5), acc.lanes) }
+          case `frzRdia_data` :
+            return { ...acc, lanes : v.reduce(this._prepare_lanesln.bind(this, 5), acc.lanes) }
 
-        case `frzRight_data` :
-          return { ...acc, lanes : v.reduce(this._prepare_lanesln.bind(this, 6), acc.lanes) }
+          case `frzRight_data` :
+            return { ...acc, lanes : v.reduce(this._prepare_lanesln.bind(this, 6), acc.lanes) }
 
-        case `speed_change` :
-          return { ...acc, timeline : v.reduce(this._prepare_timeline, acc.timeline) }
+          case `speed_change` :
+            return { ...acc, timeline : v.reduce(this._prepare_timeline, acc.timeline) }
 
-        default :
-          return acc
+          default :
+            return acc
         }
       }, {
         checkpoint : new Checkpoint(),
@@ -521,11 +529,11 @@
    * Scene Interface
    */
   class Scene {
-    setup() {
-      this.layout = JSON.parse(JSON.stringify(layout[this.constructor.name.toLowerCase()]))
+    setup(rhythmgame) {
+      this.layout = JSON.parse(JSON.stringify(rhythmgame.layout[this.constructor.name.toLowerCase()]))
       this.expand(this.layout).forEach(text => {
-        Object.assign(stage[Layer.CONTAINER], text[0])
-        stage[Layer.CONTAINER].fillText(...text[1])
+        Object.assign(rhythmgame.stage[Layer.CONTAINER], text[0])
+        rhythmgame.stage[Layer.CONTAINER].fillText(...text[1])
       })
     }
 
@@ -542,9 +550,9 @@
   class Title extends Scene {
     expand(layout) {
       layout.text.forEach(text => {
-        text[1][0] = text[1][0].replace(`__TITLE__`,  music.title)
-        text[1][0] = text[1][0].replace(`__ARTIST__`, music.artist)
-        text[1][0] = text[1][0].replace(`__EDITOR__`, music.noteeditor)
+        text[1][0] = text[1][0].replace(`__TITLE__`,  rhythmgame.music.title)
+        text[1][0] = text[1][0].replace(`__ARTIST__`, rhythmgame.music.artist)
+        text[1][0] = text[1][0].replace(`__EDITOR__`, rhythmgame.music.noteeditor)
       })
       return layout.text
     }
@@ -563,44 +571,44 @@
    * Game Scene
    */
   class Game extends Scene {
-    setup() {
-      this.layout  = JSON.parse(JSON.stringify(layout[this.constructor.name.toLowerCase()]))
-      this.player  = new Player(notechart.totalnotes)
-      this._buffer = new Drawbuffer(notechart.totalnotes)
+    setup(rhythmgame) {
+      this.layout  = JSON.parse(JSON.stringify(rhythmgame.layout[this.constructor.name.toLowerCase()]))
+      this.player  = new Player(rhythmgame.notechart.totalnotes)
+      this._buffer = new Drawbuffer(rhythmgame.notechart.totalnotes)
 
-      drawImage(stage[Layer.JUDGELINE], sprite, ...this.layout.lane.target_line)
+      drawImage(rhythmgame.stage[Layer.JUDGELINE], rhythmgame.sprite, ...this.layout.lane.target_line)
 
-      sound.currentTime = 0
-      sound.play()
-      sound.addEventListener(`ended`, () => { this.player.gameover = true }, { once : true })
+      rhythmgame.sound.currentTime = 0
+      rhythmgame.sound.play()
+      rhythmgame.sound.addEventListener(`ended`, () => { this.player.gameover = true }, { once : true })
 
-      notechart.checkpoint.rewind()
-      notechart.timeline.rewind()
-      notechart.lanes.forEach(lane => lane.rewind())
+      rhythmgame.notechart.checkpoint.rewind()
+      rhythmgame.notechart.timeline.rewind()
+      rhythmgame.notechart.lanes.forEach(lane => lane.rewind())
     }
 
     update(tick) {
       if (this.player.gameover) {
-        sound.pause()
+        rhythmgame.sound.pause()
         rhythmgame.setup(new Title())
       }
 
       const second     = (tick - this.player.started_at) / 1000
-      const moment     = notechart.timeline.forward(second)
+      const moment     = rhythmgame.notechart.timeline.forward(second)
       this.player.time = moment.time + (second - moment.second) * moment.velocity
 
-      notechart.lanes.forEach((lane, i) => {
-        if (this.player.time >= lane.at(0).time + lane.at(0).delay_judge * Number(!option.autoplay))
+      rhythmgame.notechart.lanes.forEach((lane, i) => {
+        if (this.player.time >= lane.at(0).time + lane.at(0).delay_judge * Number(!rhythmgame.option.autoplay))
           this._judge(lane, i)
 
         if (this.player.state_lnjudges[i] !== 0)
           this._judgeln(lane, i)
       })
 
-      if (this.player.time >= notechart.checkpoint.at(0).time) {
+      if (this.player.time >= rhythmgame.notechart.checkpoint.at(0).time) {
         this._combocount(this.player.score)
         requestAnimationFrame(() => rhythmgame.setup(new Result(this.player.score)))
-        notechart.checkpoint.shift()
+        rhythmgame.notechart.checkpoint.shift()
       }
     }
 
@@ -614,7 +622,7 @@
       const timing_great = 0.050
       const timing_good  = 0.100
 
-      const time = rhythmgame.driver.calc_judgetime(lane.at(0), this.player, notechart.timeline.at(0))
+      const time = rhythmgame.driver.calc_judgetime(lane.at(0), this.player, rhythmgame.notechart.timeline.at(0))
       if (time >= timing_good) return
 
       if (time <= -timing_good) {
@@ -626,8 +634,8 @@
       let   judge    = 0
       const abs_time = Math.abs(time)
       if (abs_time < timing_cool)  judge = Judge.COOL;  else
-      if (abs_time < timing_great) judge = Judge.GREAT; else
-      if (abs_time < timing_good)  judge = Judge.GOOD;  else return
+        if (abs_time < timing_great) judge = Judge.GREAT; else
+        if (abs_time < timing_good)  judge = Judge.GOOD;  else return
 
       if (lane.at(0).timeln !== 0) {
         this.player.state_lnjudges[index] = judge
@@ -639,14 +647,14 @@
     }
 
     _judgeln(lane, index) {
-      if (!option.autoplay && !this.player.state_inputs[index]) {
+      if (!rhythmgame.option.autoplay && !this.player.state_inputs[index]) {
         this._calcreset()
         this.player.state_lnjudges[index] = 0
         lane.shift()
         return
       }
 
-      const time = rhythmgame.driver.calc_judgetimeln(lane.at(0), this.player, notechart.timeline.at(0))
+      const time = rhythmgame.driver.calc_judgetimeln(lane.at(0), this.player, rhythmgame.notechart.timeline.at(0))
       if (time > 0) {
         requestAnimationFrame(() => this._draw_flash(index))
         return
@@ -682,21 +690,21 @@
       const target_y = this.layout.lane.target_line[5]
       this._clear()
 
-      notechart.lanes.forEach((lane, i) => {
-        stage[Layer.CONTAINER].fillStyle = this.layout.lane.color[i]
+      rhythmgame.notechart.lanes.forEach((lane, i) => {
+        rhythmgame.stage[Layer.CONTAINER].fillStyle = this.layout.lane.color[i]
 
         for (let j = 0; j < lane.length; j++) {
           const note = lane.at(j)
           if (note.time > this.player.time + note.lifetime) continue
 
-          const y = Math.min(target_y, Math.trunc(height * option.speed * (this.player.time - note.time) / note.lifetime + target_y))
+          const y = Math.min(target_y, Math.trunc(height * rhythmgame.option.speed * (this.player.time - note.time) / note.lifetime + target_y))
 
           if (note.timeln === 0) {
             this._draw(y, i)
             continue
           }
 
-          const y2 = Math.min(target_y, Math.trunc(height * option.speed * (this.player.time - note.timeln) / note.lifetime + target_y))
+          const y2 = Math.min(target_y, Math.trunc(height * rhythmgame.option.speed * (this.player.time - note.timeln) / note.lifetime + target_y))
           this._draw_bar(y, y2, i)
           this._draw(y,  i)
           this._draw(y2, i)
@@ -706,59 +714,59 @@
 
     _draw(y, i) {
       const rect = [ this.layout.lane.face[i][4], y, this.layout.lane.face[i][2], this.layout.lane.face[i][3] ]
-      drawImage(stage[Layer.CONTAINER], sprite, ...this.layout.lane.face[i], y)
-      stage[Layer.CONTAINER].globalCompositeOperation = `source-atop`
-      stage[Layer.CONTAINER].fillRect(...rect)
-      stage[Layer.CONTAINER].globalCompositeOperation = `source-over`
+      drawImage(rhythmgame.stage[Layer.CONTAINER], rhythmgame.sprite, ...this.layout.lane.face[i], y)
+      rhythmgame.stage[Layer.CONTAINER].globalCompositeOperation = `source-atop`
+      rhythmgame.stage[Layer.CONTAINER].fillRect(...rect)
+      rhythmgame.stage[Layer.CONTAINER].globalCompositeOperation = `source-over`
       this._buffer.push(rect)
     }
 
     _draw_bar(y1, y2, i) {
       const _y2  = y2 + this.layout.lane.face_alpha[i][3] / 2
       const rect = [ this.layout.lane.face_alpha[i][4], _y2, this.layout.lane.face_alpha[i][2], y1 - y2]
-      stage[Layer.CONTAINER].drawImage(sprite, ...this.layout.lane.bar[i], _y2, this.layout.lane.bar[i][2], y1 - y2)
-      stage[Layer.CONTAINER].globalCompositeOperation = `source-atop`
-      stage[Layer.CONTAINER].fillRect(...rect)
-      stage[Layer.CONTAINER].globalCompositeOperation = `destination-out`
-      drawImage(stage[Layer.CONTAINER], sprite, ...this.layout.lane.face_alpha[i], y1)
-      drawImage(stage[Layer.CONTAINER], sprite, ...this.layout.lane.face_alpha[i], y2)
-      stage[Layer.CONTAINER].globalCompositeOperation = `source-over`
+      rhythmgame.stage[Layer.CONTAINER].drawImage(rhythmgame.sprite, ...this.layout.lane.bar[i], _y2, this.layout.lane.bar[i][2], y1 - y2)
+      rhythmgame.stage[Layer.CONTAINER].globalCompositeOperation = `source-atop`
+      rhythmgame.stage[Layer.CONTAINER].fillRect(...rect)
+      rhythmgame.stage[Layer.CONTAINER].globalCompositeOperation = `destination-out`
+      drawImage(rhythmgame.stage[Layer.CONTAINER], rhythmgame.sprite, ...this.layout.lane.face_alpha[i], y1)
+      drawImage(rhythmgame.stage[Layer.CONTAINER], rhythmgame.sprite, ...this.layout.lane.face_alpha[i], y2)
+      rhythmgame.stage[Layer.CONTAINER].globalCompositeOperation = `source-over`
       this._buffer.push(rect)
     }
 
     _draw_flash(i) {
       const y    = this.layout.lane.target_line[5]
       const rect = [ this.layout.lane.flash[i][4], y, this.layout.lane.flash[i][2], this.layout.lane.flash[i][3] ]
-      drawImage(stage[Layer.TEXTEFFECT], sprite, ...this.layout.lane.flash[i], y)
-      setTimeout(() => stage[Layer.TEXTEFFECT].clearRect(...rect), 50)
+      drawImage(rhythmgame.stage[Layer.TEXTEFFECT], rhythmgame.sprite, ...this.layout.lane.flash[i], y)
+      setTimeout(() => rhythmgame.stage[Layer.TEXTEFFECT].clearRect(...rect), 50)
     }
 
     _clear() {
       for (let i = 0; i < this._buffer.length; i++) {
-        stage[Layer.CONTAINER].clearRect(...this._buffer.at(i))
+        rhythmgame.stage[Layer.CONTAINER].clearRect(...this._buffer.at(i))
       }
       this._buffer.clear()
     }
 
     _draw_combo() {
-      stage[Layer.TEXTEFFECT].fillStyle = this.layout.judge.color[this.player.state_judge]
-      stage[Layer.TEXTEFFECT].clearRect(0, stage[Layer.TEXTEFFECT].canvas.height / 2 - 24, stage[Layer.TEXTEFFECT].canvas.width, 48)
+      rhythmgame.stage[Layer.TEXTEFFECT].fillStyle = this.layout.judge.color[this.player.state_judge]
+      rhythmgame.stage[Layer.TEXTEFFECT].clearRect(0, rhythmgame.stage[Layer.TEXTEFFECT].canvas.height / 2 - 24, rhythmgame.stage[Layer.TEXTEFFECT].canvas.width, 48)
 
       if (this.player.state_judge === 0) return
-      stage[Layer.TEXTEFFECT].fillText(this.player.score.combo, stage[Layer.TEXTEFFECT].canvas.width / 2, stage[Layer.TEXTEFFECT].canvas.height / 2)
+      rhythmgame.stage[Layer.TEXTEFFECT].fillText(this.player.score.combo, rhythmgame.stage[Layer.TEXTEFFECT].canvas.width / 2, rhythmgame.stage[Layer.TEXTEFFECT].canvas.height / 2)
     }
 
     onkeydown(event) {
-      const speed = option.speed
+      const speed = rhythmgame.option.speed
       switch (event.key) {
         case `Tab`:
           event.preventDefault()
-          option.speed = Math.min(speed + 0.25, 5.00)
+          rhythmgame.option.speed = Math.min(speed + 0.25, 5.00)
           return
 
         case `Shift`:
           event.preventDefault()
-          option.speed = Math.max(speed - 0.25, 1.00)
+          rhythmgame.option.speed = Math.max(speed - 0.25, 1.00)
           return
 
         case `Delete`:
@@ -767,18 +775,18 @@
           return
       }
 
-      if (option.autoplay) return
+      if (rhythmgame.option.autoplay) return
 
-      [ ...option.keybinds ].forEach((key, i) => {
+      [ ...rhythmgame.option.keybinds ].forEach((key, i) => {
         if (event.key !== key) return
         this.player.state_inputs[i] = true
-        this._judge(notechart.lanes[i], i)
+        this._judge(rhythmgame.notechart.lanes[i], i)
       })
     }
 
     onkeyup(event) {
-      if (option.autoplay) return
-      [ ...option.keybinds ].forEach((key, i) => {
+      if (rhythmgame.option.autoplay) return
+      [ ...rhythmgame.option.keybinds ].forEach((key, i) => {
         if (event.key !== key) return
         this.player.state_inputs[i] = false
       })
@@ -804,17 +812,27 @@
       })
       return layout.text
     }
+
+    onkeydown(event) {
+      switch (event.key) {
+        case `Backspace`:
+          event.preventDefault()
+          rhythmgame.setup(new Game())
+          return
+
+        case `Enter`:
+          event.preventDefault()
+          rhythmgame.setup(new Title())
+          return
+      }
+    }
   }
 
   const rhythmgame = new Rhythmgame()
-  const profile    = document.querySelector`script#rhythmgame`.getAttribute`name`
-
-  const { music, sound, notechart, option, layout, sprite } = await rhythmgame.fetch(`${profile}/settings.json`)
-
-  const stage = rhythmgame.prepare_stage()
-
-  rhythmgame.setup(new Title())
-  rhythmgame.start()
+  await rhythmgame.load()
+        rhythmgame.build()
+        rhythmgame.setup(new Title())
+        rhythmgame.start()
 
   function drawImage(context, image, sx, sy, sWidth, sHeight, dx, dy) {
     context.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, sWidth, sHeight)
