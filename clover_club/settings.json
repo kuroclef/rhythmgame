@@ -1,0 +1,18 @@
+{
+  "music" : {
+    "title"      : "クローバー♣クラブ",
+    "artist"     : "ゆうゆ",
+    "noteeditor" : "Moriya Kazumi"
+  },
+  "sound"     : "//kuroclef.honifuwa.com/rhythmgame/clover_club/music.mp3",
+  "notechart" : "/rhythmgame/clover_club/dos.txt",
+  "option" : {
+    "speed"      : 2.5,
+    "reverse"    : false,
+    "adjustment" : 0,
+    "keybinds"   : "sdf jkl",
+    "autoplay"   : false
+  },
+  "layout" : "/rhythmgame/layouts/danoni.json",
+  "sprite" : "/rhythmgame/sprites/danoni.png"
+}
