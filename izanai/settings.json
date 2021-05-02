@@ -8,7 +8,7 @@
   "notechart" : "/rhythmgame/izanai/dos.txt",
   "option" : {
     "speed"      : 2.5,
-    "reverse"    : true,
+    "reverse"    : false,
     "adjustment" : 0,
     "keybinds"   : "sdf jkl",
     "autoplay"   : false

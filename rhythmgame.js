@@ -654,6 +654,7 @@
       this.player     = new Player(rhythmgame.notechart.totalnotes)
       this._buffer    = new Drawbuffer(rhythmgame.notechart.totalnotes)
 
+      this.layout.lane.target_line = (rhythmgame.option.reverse) ? this.layout.lane.target_line_r : this.layout.lane.target_line_s
       drawImage(rhythmgame.stage[Layer.JUDGELINE], rhythmgame.sprite, ...this.layout.lane.target_line)
 
       rhythmgame.sound.currentTime = 0
@@ -671,7 +672,8 @@
         this.rhythmgame.setup(new Title())
       }
 
-      const second     = (tick - this.player.started_at) / 1000
+      const adjustment = this.rhythmgame.option.adjustment * 1000 / 60
+      const second     = (tick - this.player.started_at - adjustment) / 1000
       const moment     = this.rhythmgame.notechart.timeline.forward(second)
       this.player.time = moment.time + (second - moment.second) * moment.velocity
 
@@ -775,14 +777,17 @@
           const note = lane.at(j)
           if (note.time > this.player.time + note.lifetime) continue
 
-          const y = Math.min(target_y, Math.trunc(height * this.rhythmgame.option.speed * (this.player.time - note.time) / note.lifetime + target_y))
+          const _y = Math.trunc(height * this.rhythmgame.option.speed * (this.player.time - note.time) / note.lifetime)
+          const  y = (this.rhythmgame.option.reverse) ? Math.max(target_y, target_y - _y) : Math.min(target_y, target_y + _y)
 
           if (note.timeln === 0) {
             this._draw(y, i)
             continue
           }
 
-          const y2 = Math.min(target_y, Math.trunc(height * this.rhythmgame.option.speed * (this.player.time - note.timeln) / note.lifetime + target_y))
+          const _y2 = Math.trunc(height * this.rhythmgame.option.speed * (this.player.time - note.timeln) / note.lifetime)
+          const  y2 = (this.rhythmgame.option.reverse) ? Math.max(target_y, target_y - _y2) : Math.min(target_y, target_y + _y2)
+
           this._draw_bar(y, y2, i)
           this._draw(y,  i)
           this._draw(y2, i)
