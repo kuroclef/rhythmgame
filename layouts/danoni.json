@@ -52,25 +52,39 @@
   },
   "title" : {
     "text" : [
-      [ { "font" : "300 48px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Dancing☆Onigiri", 300,  70 ] ],
-      [ { "font" : "300 80px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "__TITLE__"      , 300, 225 ] ],
-      [ { "font" : "300 48px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Press Enter"    , 300, 380 ] ],
+      [ { "font" : "300 48px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Dancing☆Onigiri", 300,  80 ] ],
+      [ { "font" : "300 80px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "__TITLE__",       300, 230 ] ],
+      [ { "font" : "300 48px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Press Enter",     300, 370 ] ],
       [ { "font" : "300 24px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Maker : __EDITOR__　Music : __ARTIST__", 300, 430 ] ]
+    ]
+  },
+  "option" : {
+    "text" : [
+      [ { "font" : "300 48px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Option",            300,  80 ] ],
+      [ { "font" : "300 36px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#fff", "textAlign" : "left"   }, [ "Speed",             170, 150 ] ],
+      [ { "font" : "300 36px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#fff", "textAlign" : "left"   }, [ "Scroll",            170, 200 ] ],
+      [ { "font" : "300 36px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#fff", "textAlign" : "left"   }, [ "Adjustment",        170, 250 ] ],
+      [ { "font" : "300 36px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#fff", "textAlign" : "left"   }, [ "AutoPlay",          170, 300 ] ],
+      [ { "font" : "300 36px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#fff", "textAlign" : "right"  }, [ "x __SPEED__",       430, 150 ] ],
+      [ { "font" : "300 36px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#fff", "textAlign" : "right"  }, [ "__REVERSE__",       430, 200 ] ],
+      [ { "font" : "300 36px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#fff", "textAlign" : "right"  }, [ "__ADJUSTMENT__",    430, 250 ] ],
+      [ { "font" : "300 36px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#fff", "textAlign" : "right"  }, [ "__AUTOPLAY__",      430, 300 ] ],
+      [ { "font" : "300 48px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Let’s Dance Now!!", 300, 370 ] ],
+      [ { "font" : "300 24px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "←→:Speed　↓↑:Scroll　+-:Adjustment　a:AutoPlay", 300, 430 ] ]
     ]
   },
   "result" : {
     "text" : [
-      [ { "font" : "300 48px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Game Clear!", 300,  70 ] ],
-      [ { "font" : "300 36px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#ff0", "textAlign" : "left"   }, [ "(･∀･)ｲｲ!!"  , 150, 160 ] ],
-      [ { "font" : "300 36px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#0ff", "textAlign" : "left"   }, [ "(`･ω･)ｼｬｷﾝ!", 150, 200 ] ],
-      [ { "font" : "300 36px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#33f", "textAlign" : "left"   }, [ "(´∀`)ﾏﾀｰﾘ"  , 150, 240 ] ],
-      [ { "font" : "300 36px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#f33", "textAlign" : "left"   }, [ "(･ω･`)ｼｮﾎﾞﾝ", 150, 280 ] ],
-      [ { "font" : "300 36px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#fff", "textAlign" : "left"   }, [ "Score",       175, 380 ] ],
-      [ { "font" : "300 36px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#ff0", "textAlign" : "right"  }, [ "__COOL__",    450, 160 ] ],
-      [ { "font" : "300 36px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#0ff", "textAlign" : "right"  }, [ "__GREAT__",   450, 200 ] ],
-      [ { "font" : "300 36px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#33f", "textAlign" : "right"  }, [ "__GOOD__",    450, 240 ] ],
-      [ { "font" : "300 36px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#f33", "textAlign" : "right"  }, [ "__BAD__",     450, 280 ] ],
-      [ { "font" : "300 36px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#fff", "textAlign" : "right"  }, [ "__SCORE__",   425, 380 ] ]
+      [ { "font" : "300 48px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Game Clear!", 300,  80 ] ],
+      [ { "font" : "300 32px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#ff0", "textAlign" : "left"   }, [ "(･∀･)ｲｲ!!",   170, 160 ] ],
+      [ { "font" : "300 32px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#0ff", "textAlign" : "left"   }, [ "(`･ω･)ｼｬｷﾝ!", 170, 200 ] ],
+      [ { "font" : "300 32px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#33f", "textAlign" : "left"   }, [ "(´∀`)ﾏﾀｰﾘ",   170, 240 ] ],
+      [ { "font" : "300 32px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#f33", "textAlign" : "left"   }, [ "(･ω･`)ｼｮﾎﾞﾝ", 170, 280 ] ],
+      [ { "font" : "300 36px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#ff0", "textAlign" : "right"  }, [ "__COOL__",    430, 160 ] ],
+      [ { "font" : "300 36px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#0ff", "textAlign" : "right"  }, [ "__GREAT__",   430, 200 ] ],
+      [ { "font" : "300 36px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#33f", "textAlign" : "right"  }, [ "__GOOD__",    430, 240 ] ],
+      [ { "font" : "300 36px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#f33", "textAlign" : "right"  }, [ "__BAD__",     430, 280 ] ],
+      [ { "font" : "300 48px system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "fillStyle" : "#fff", "textAlign" : "center" }, [ "Score __SCORE__", 300, 370 ] ]
     ]
   }
 }

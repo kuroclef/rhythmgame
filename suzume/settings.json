@@ -7,9 +7,11 @@
   "sound"     : "//kuroclef.honifuwa.com/rhythmgame/suzume/music.mp3",
   "notechart" : "/rhythmgame/suzume/dos.txt",
   "option" : {
-    "speed"    : 2.5,
-    "keybinds" : "sdf jkl",
-    "autoplay" : true
+    "speed"      : 2.5,
+    "reverse"    : true,
+    "adjustment" : 0,
+    "keybinds"   : "sdf jkl",
+    "autoplay"   : false
   },
   "layout" : "/rhythmgame/layouts/danoni.json",
   "sprite" : "/rhythmgame/sprites/danoni.png"
