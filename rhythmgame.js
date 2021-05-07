@@ -256,7 +256,7 @@
         canvas.height = parseInt(container.style.height)
         container.appendChild(canvas)
         return Object.assign(canvas.getContext(`2d`), {
-          font         : `300 48px Open Sans`,
+          font         : `300 48px system-ui, -apple-system, BlinkMacSystemFont, sans-serif`,
           textAlign    : `center`,
           textBaseline : `middle`
         })
@@ -833,7 +833,7 @@
 
     _draw_combo() {
       this.rhythmgame.stage[Layer.TEXTEFFECT].fillStyle = this.layout.judge.color[this.player.state_judge]
-      this.rhythmgame.stage[Layer.TEXTEFFECT].clearRect(0, this.rhythmgame.stage[Layer.TEXTEFFECT].canvas.height / 2 - 24, this.rhythmgame.stage[Layer.TEXTEFFECT].canvas.width, 48)
+      this.rhythmgame.stage[Layer.TEXTEFFECT].clearRect(0, this.rhythmgame.stage[Layer.TEXTEFFECT].canvas.height / 2 - 30, this.rhythmgame.stage[Layer.TEXTEFFECT].canvas.width, 60)
 
       if (this.player.state_judge === 0) return
       this.rhythmgame.stage[Layer.TEXTEFFECT].fillText(this.player.score.combo, this.rhythmgame.stage[Layer.TEXTEFFECT].canvas.width / 2, this.rhythmgame.stage[Layer.TEXTEFFECT].canvas.height / 2)
@@ -860,7 +860,7 @@
 
       if (this.rhythmgame.option.autoplay) return
 
-      [ ...this.rhythmgame.option.keybinds ].forEach((key, i) => {
+      this.rhythmgame.option.keybinds.forEach((key, i) => {
         if (event.key !== key) return
         this.player.state_inputs[i] = true
         this._judge(this.rhythmgame.notechart.lanes[i], i)
@@ -869,7 +869,7 @@
 
     onkeyup(event) {
       if (this.rhythmgame.option.autoplay) return
-      [ ...this.rhythmgame.option.keybinds ].forEach((key, i) => {
+      this.rhythmgame.option.keybinds.forEach((key, i) => {
         if (event.key !== key) return
         this.player.state_inputs[i] = false
       })

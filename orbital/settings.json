@@ -10,7 +10,7 @@
     "speed"      : 2.5,
     "reverse"    : false,
     "adjustment" : 0,
-    "keybinds"   : "sdf jkl",
+    "keybinds"   : [ "ArrowLeft", "", "ArrowDown", " ", "ArrowUp", "", "ArrowRight" ],
     "autoplay"   : false
   },
   "layout" : "/rhythmgame/layouts/danoni.json",
