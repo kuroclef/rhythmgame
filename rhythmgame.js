@@ -300,7 +300,7 @@
    * Driver to Parse Notechart (Interface)
    */
   class Driver {
-    parse(notechart, rhythmgame) {}
+    parse(notechart) {}
     prepare(notechart, rhythmgame) {}
     calc_judgetime(note, player, moment) {}
     calc_judgetimeln(note, player, moment) {}
@@ -413,7 +413,8 @@
         }
 
         switch (k) {
-          case `speed_data` : case `speed_change` :
+          case `speed_data` :
+          case `speed_change` :
             return { ...acc, timeline : v.reduce(this._prepare_timeline, acc.timeline) }
 
           default :
@@ -659,7 +660,8 @@
 
       if (this.player.time >= this.rhythmgame.notechart.checkpoint.at(0).time) {
         this._combocount(this.player.score)
-        requestAnimationFrame(() => this.rhythmgame.setup(new Result(this.player.score)))
+        if (!this.rhythmgame.option.autoplay)
+          requestAnimationFrame(() => this.rhythmgame.setup(new Result(this.player.score)))
         this.rhythmgame.notechart.checkpoint.shift()
       }
     }
@@ -686,8 +688,8 @@
       let   judge    = 0
       const abs_time = Math.abs(time)
       if (abs_time < timing_cool)  judge = Judge.COOL;  else
-        if (abs_time < timing_great) judge = Judge.GREAT; else
-        if (abs_time < timing_good)  judge = Judge.GOOD;  else return
+      if (abs_time < timing_great) judge = Judge.GREAT; else
+      if (abs_time < timing_good)  judge = Judge.GOOD;  else return
 
       if (lane.at(0).timeln !== 0) {
         this.player.state_lnjudges[index] = judge
@@ -833,9 +835,15 @@
           this.rhythmgame.option.speed = Math.max(speed - 0.25, 1.00)
           return
 
+        case `Backspace`:
+          event.preventDefault()
+          this.rhythmgame.setup(new Game())
+          return
+
         case `Delete`:
           event.preventDefault()
-          this.player.gameover = true
+          this.rhythmgame.sound.pause()
+          this.rhythmgame.setup(new Title())
           return
       }
 
