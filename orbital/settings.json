@@ -5,10 +5,10 @@
     "noteeditor" : "Moriya Kazumi"
   },
   "sound"     : "//kuroclef.honifuwa.com/rhythmgame/orbital/music.mp3",
-  "notechart" : "/rhythmgame/orbital/dos.txt",
+  "notechart" : "/rhythmgame/orbital/notechart.ssc",
   "option" : {
     "speed"      : 2.5,
-    "reverse"    : false,
+    "reverse"    : true,
     "adjustment" : 0,
     "keybinds"   : [ "ArrowLeft", "", "ArrowDown", " ", "ArrowUp", "", "ArrowRight" ],
     "autoplay"   : false

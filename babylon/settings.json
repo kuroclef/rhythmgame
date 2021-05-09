@@ -1,11 +1,11 @@
 {
   "music" : {
-    "title"      : "クローバー♣クラブ",
-    "artist"     : "ゆうゆ",
+    "title"      : "BABYLON",
+    "artist"     : "SHIKI",
     "noteeditor" : "Moriya Kazumi"
   },
-  "sound"     : "//kuroclef.honifuwa.com/rhythmgame/clover_club/music.mp3",
-  "notechart" : "/rhythmgame/clover_club/dos.txt",
+  "sound"     : "//kuroclef.honifuwa.com/rhythmgame/babylon/music.mp3",
+  "notechart" : "/rhythmgame/babylon/dos.txt",
   "option" : {
     "speed"      : 2.5,
     "reverse"    : true,
