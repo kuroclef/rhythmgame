@@ -13,6 +13,6 @@
     "keybinds"   : [ "ArrowLeft", "", "ArrowDown", " ", "ArrowUp", "", "ArrowRight" ],
     "autoplay"   : false
   },
-  "layout" : "/rhythmgame/layouts/danoni.json",
-  "sprite" : "/rhythmgame/sprites/danoni.png"
+  "layout" : "/rhythmgame/layouts/dancing_onigiri.json",
+  "sprite" : "/rhythmgame/sprites/dancing_onigiri.png"
 }
