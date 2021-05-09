@@ -4,7 +4,7 @@
     "artist"     : "SHIKI",
     "noteeditor" : "Moriya Kazumi"
   },
-  "sound"     : "//kuroclef.honifuwa.com/rhythmgame/babylon/music.mp3",
+  "sound"     : "/rhythmgame/babylon/music.mp3",
   "notechart" : "/rhythmgame/babylon/dos.txt",
   "option" : {
     "layout"     : "5keys",

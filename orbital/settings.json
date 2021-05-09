@@ -4,7 +4,7 @@
     "artist"     : "callasoiled",
     "noteeditor" : "Moriya Kazumi"
   },
-  "sound"     : "//kuroclef.honifuwa.com/rhythmgame/orbital/music.mp3",
+  "sound"     : "/rhythmgame/orbital/music.mp3",
   "notechart" : "/rhythmgame/orbital/notechart.ssc",
   "option" : {
     "layout"     : "5keys",
