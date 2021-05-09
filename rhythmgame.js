@@ -543,6 +543,14 @@
    * Option Scene
    */
   class Option extends Scene {
+    setup(rhythmgame) {
+      super.setup(rhythmgame)
+
+      rhythmgame.sound.currentTime = 0
+      rhythmgame.sound.volume      = 0
+      rhythmgame.sound.play()
+    }
+
     expand(layout) {
       layout.text.forEach(text => {
         text[1][0] = text[1][0].replace(`__SPEED__`,      this.rhythmgame.option.speed.toFixed(2))
@@ -631,6 +639,7 @@
       })
 
       rhythmgame.sound.currentTime = 0
+      rhythmgame.sound.volume      = 1
       rhythmgame.sound.play()
       rhythmgame.sound.addEventListener(`ended`, () => { this.player.gameover = true }, { once : true })
 
@@ -642,7 +651,7 @@
     update(tick) {
       if (this.player.gameover) {
         this.rhythmgame.sound.pause()
-        this.rhythmgame.setup(new Title())
+        if (this.rhythmgame.option.autoplay) this.rhythmgame.setup(new Title())
       }
 
       const adjustment = this.rhythmgame.option.adjustment * 1000 / 60
@@ -651,11 +660,13 @@
       this.player.time = moment.time + (second - moment.second) * moment.velocity
 
       this.rhythmgame.notechart.lanes.forEach((lane, i) => {
-        while (this.player.time >= lane.at(0).time + lane.at(0).delay_judge * Number(!this.rhythmgame.option.autoplay))
+        while (this.player.time >= lane.at(0).time + lane.at(0).delay_judge * Number(!this.rhythmgame.option.autoplay)) {
+          if (this.player.state_lnjudges[i] !== 0) {
+            this._judgeln(lane, i)
+            break
+          }
           this._judge(lane, i)
-
-        if (this.player.state_lnjudges[i] !== 0)
-          this._judgeln(lane, i)
+        }
       })
 
       if (this.player.time >= this.rhythmgame.notechart.checkpoint.at(0).time) {
@@ -851,6 +862,7 @@
 
       this.rhythmgame.option.keybinds.forEach((key, i) => {
         if (event.key !== key) return
+        event.preventDefault()
         this.player.state_inputs[i] = true
         this._judge(this.rhythmgame.notechart.lanes[i], i)
       })
@@ -860,6 +872,7 @@
       if (this.rhythmgame.option.autoplay) return
       this.rhythmgame.option.keybinds.forEach((key, i) => {
         if (event.key !== key) return
+        event.preventDefault()
         this.player.state_inputs[i] = false
       })
     }
