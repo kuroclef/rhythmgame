@@ -7,10 +7,11 @@
   "sound"     : "//kuroclef.honifuwa.com/rhythmgame/clover_club/music.mp3",
   "notechart" : "/rhythmgame/clover_club/dos.txt",
   "option" : {
+    "layout"     : "5keys",
     "speed"      : 2.5,
     "reverse"    : true,
     "adjustment" : 0,
-    "keybinds"   : [ "ArrowLeft", "", "ArrowDown", " ", "ArrowUp", "", "ArrowRight" ],
+    "keybinds"   : [ "ArrowLeft", "ArrowDown", "ArrowUp", "ArrowRight", " " ],
     "autoplay"   : false
   },
   "layout" : "/rhythmgame/layouts/dancing_onigiri.json",

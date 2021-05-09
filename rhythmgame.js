@@ -208,7 +208,7 @@
               return image
             })
 
-        case `ogg` : case `mp3` :
+        case `mp3` :
           return fetch(url)
             .then(response => response.blob())
             .then(blob => new Audio(URL.createObjectURL(blob)))
@@ -241,11 +241,12 @@
 
     _parse(driver, notechart) {
       this.driver = driver
-      return driver.parse(notechart)
+      return driver.parse(notechart, this)
     }
 
     build() {
-      this.stage = this._prepare_stage()
+      this.stage     = this._prepare_stage()
+      this.notechart = this.driver.prepare(this.notechart, this)
     }
 
     _prepare_stage() {
@@ -299,7 +300,8 @@
    * Driver to Parse Notechart (Interface)
    */
   class Driver {
-    parse(notechart) {}
+    parse(notechart, rhythmgame) {}
+    prepare(notechart, rhythmgame) {}
     calc_judgetime(note, player, moment) {}
     calc_judgetimeln(note, player, moment) {}
   }
@@ -309,7 +311,7 @@
    */
   class StepMania extends Driver {
     parse(notechart) {
-      const chart = notechart.split(/[\n\r]+/).reduce((acc, line) => {
+      return notechart.split(/[\n\r]+/).reduce((acc, line) => {
         if (line.includes(`,  //`)) return `${acc},`
         if (line.includes(`//`))    return `${acc}`
         return `${acc}${line}`
@@ -317,10 +319,9 @@
         if (v.includes(`=`)) return v.split(`=`)
         return v
       }))).map(([ k, v ]) => [ ...k, v ])
-      return this._prepare(chart)
     }
 
-    _prepare(notechart) {
+    prepare(notechart, rhythmgame) {
       let   offset = 0
       const chart  = notechart.reduce((acc, [ k, v ]) => {
         switch (k) {
@@ -392,58 +393,27 @@
    */
   class DancingOnigiri extends Driver {
     parse(notechart) {
-      const chart = notechart.split(/[\n\r\&]+/).filter(line => {
+      return notechart.split(/[\n\r\&]+/).filter(line => {
         return /.=./.test(line)
       }).map(v => v.split(`=`).map(v => v.split(`,`))).map(([ k, v ]) => [ ...k, v ])
-      return this._prepare(chart)
     }
 
-    _prepare(notechart) {
+    prepare(notechart, rhythmgame) {
+      const { header_note, header_longnote } = rhythmgame.layout.driver[this.constructor.name.toLowerCase()][rhythmgame.option.layout.toLowerCase()]
+
       const chart = notechart.reduce((acc, [ k, v ]) => {
+        for (const [ i, header ] of header_note.entries()) {
+          if (k !== header) continue
+          return { ...acc, lanes : v.reduce(this._prepare_lanes.bind(this, i), acc.lanes) }
+        }
+
+        for (const [ i, header ] of header_longnote.entries()) {
+          if (k !== header) continue
+          return { ...acc, lanes : v.reduce(this._prepare_lanesln.bind(this, i), acc.lanes) }
+        }
+
         switch (k) {
-          case `left_data` :
-            return { ...acc, lanes : v.reduce(this._prepare_lanes.bind(this, 0), acc.lanes) }
-
-          case `leftdia_data` :
-            return { ...acc, lanes : v.reduce(this._prepare_lanes.bind(this, 1), acc.lanes) }
-
-          case `down_data` :
-            return { ...acc, lanes : v.reduce(this._prepare_lanes.bind(this, 2), acc.lanes) }
-
-          case `space_data` :
-            return { ...acc, lanes : v.reduce(this._prepare_lanes.bind(this, 3), acc.lanes) }
-
-          case `up_data` :
-            return { ...acc, lanes : v.reduce(this._prepare_lanes.bind(this, 4), acc.lanes) }
-
-          case `rightdia_data` :
-            return { ...acc, lanes : v.reduce(this._prepare_lanes.bind(this, 5), acc.lanes) }
-
-          case `right_data` :
-            return { ...acc, lanes : v.reduce(this._prepare_lanes.bind(this, 6), acc.lanes) }
-
-          case `frzLeft_data` :
-            return { ...acc, lanes : v.reduce(this._prepare_lanesln.bind(this, 0), acc.lanes) }
-
-          case `frzLdia_data` :
-            return { ...acc, lanes : v.reduce(this._prepare_lanesln.bind(this, 1), acc.lanes) }
-
-          case `frzDown_data` :
-            return { ...acc, lanes : v.reduce(this._prepare_lanesln.bind(this, 2), acc.lanes) }
-
-          case `frzSpace_data` :
-            return { ...acc, lanes : v.reduce(this._prepare_lanesln.bind(this, 3), acc.lanes) }
-
-          case `frzUp_data` :
-            return { ...acc, lanes : v.reduce(this._prepare_lanesln.bind(this, 4), acc.lanes) }
-
-          case `frzRdia_data` :
-            return { ...acc, lanes : v.reduce(this._prepare_lanesln.bind(this, 5), acc.lanes) }
-
-          case `frzRight_data` :
-            return { ...acc, lanes : v.reduce(this._prepare_lanesln.bind(this, 6), acc.lanes) }
-
-          case `speed_change` :
+          case `speed_data` : case `speed_change` :
             return { ...acc, timeline : v.reduce(this._prepare_timeline, acc.timeline) }
 
           default :
@@ -650,12 +620,14 @@
   class Game extends Scene {
     setup(rhythmgame) {
       this.rhythmgame = rhythmgame
-      this.layout     = JSON.parse(JSON.stringify(rhythmgame.layout[this.constructor.name.toLowerCase()]))
+      this.layout     = JSON.parse(JSON.stringify(rhythmgame.layout[this.constructor.name.toLowerCase()][rhythmgame.option.layout.toLowerCase()]))
       this.player     = new Player(rhythmgame.notechart.totalnotes)
       this._buffer    = new Drawbuffer(rhythmgame.notechart.totalnotes)
 
-      this.layout.lane.target_line = (rhythmgame.option.reverse) ? this.layout.lane.target_line_r : this.layout.lane.target_line_s
-      drawImage(rhythmgame.stage[Layer.JUDGELINE], rhythmgame.sprite, ...this.layout.lane.target_line)
+      this.layout.lane.target_y = (rhythmgame.option.reverse) ? this.layout.lane.target_y_r : this.layout.lane.target_y_s
+      this.layout.lane.target.forEach(point => {
+        drawImage(rhythmgame.stage[Layer.JUDGELINE], rhythmgame.sprite, ...point, this.layout.lane.target_y)
+      })
 
       rhythmgame.sound.currentTime = 0
       rhythmgame.sound.play()
@@ -767,7 +739,7 @@
 
     render(tick) {
       const height   = this.layout.lane.height
-      const target_y = this.layout.lane.target_line[5]
+      const target_y = this.layout.lane.target_y
       this._clear()
 
       this.rhythmgame.notechart.lanes.forEach((lane, i) => {
@@ -796,8 +768,17 @@
     }
 
     _draw(y, i) {
-      const rect = [ this.layout.lane.face[i][4], y, this.layout.lane.face[i][2], this.layout.lane.face[i][3] ]
-      drawImage(this.rhythmgame.stage[Layer.CONTAINER], this.rhythmgame.sprite, ...this.layout.lane.face[i], y)
+      const rect = [ this.layout.lane.note[i][4], y, this.layout.lane.note[i][2], this.layout.lane.note[i][3] ]
+      drawImage(this.rhythmgame.stage[Layer.CONTAINER], this.rhythmgame.sprite, ...this.layout.lane.note[i], y)
+      this.rhythmgame.stage[Layer.CONTAINER].globalCompositeOperation = `source-atop`
+      this.rhythmgame.stage[Layer.CONTAINER].fillRect(...rect)
+      this.rhythmgame.stage[Layer.CONTAINER].globalCompositeOperation = `source-over`
+      this._buffer.push(rect)
+    }
+
+    _draw(y, i) {
+      const rect = [ this.layout.lane.note[i][4], y, this.layout.lane.note[i][2], this.layout.lane.note[i][3] ]
+      drawImage(this.rhythmgame.stage[Layer.CONTAINER], this.rhythmgame.sprite, ...this.layout.lane.note[i], y)
       this.rhythmgame.stage[Layer.CONTAINER].globalCompositeOperation = `source-atop`
       this.rhythmgame.stage[Layer.CONTAINER].fillRect(...rect)
       this.rhythmgame.stage[Layer.CONTAINER].globalCompositeOperation = `source-over`
@@ -805,20 +786,20 @@
     }
 
     _draw_bar(y1, y2, i) {
-      const _y2  = y2 + this.layout.lane.face_alpha[i][3] / 2
-      const rect = [ this.layout.lane.face_alpha[i][4], _y2, this.layout.lane.face_alpha[i][2], y1 - y2]
+      const _y2  = y2 + this.layout.lane.note_alpha[i][3] / 2
+      const rect = [ this.layout.lane.note_alpha[i][4], _y2, this.layout.lane.note_alpha[i][2], y1 - y2]
       this.rhythmgame.stage[Layer.CONTAINER].drawImage(this.rhythmgame.sprite, ...this.layout.lane.bar[i], _y2, this.layout.lane.bar[i][2], y1 - y2)
       this.rhythmgame.stage[Layer.CONTAINER].globalCompositeOperation = `source-atop`
       this.rhythmgame.stage[Layer.CONTAINER].fillRect(...rect)
       this.rhythmgame.stage[Layer.CONTAINER].globalCompositeOperation = `destination-out`
-      drawImage(this.rhythmgame.stage[Layer.CONTAINER], this.rhythmgame.sprite, ...this.layout.lane.face_alpha[i], y1)
-      drawImage(this.rhythmgame.stage[Layer.CONTAINER], this.rhythmgame.sprite, ...this.layout.lane.face_alpha[i], y2)
+      drawImage(this.rhythmgame.stage[Layer.CONTAINER], this.rhythmgame.sprite, ...this.layout.lane.note_alpha[i], y1)
+      drawImage(this.rhythmgame.stage[Layer.CONTAINER], this.rhythmgame.sprite, ...this.layout.lane.note_alpha[i], y2)
       this.rhythmgame.stage[Layer.CONTAINER].globalCompositeOperation = `source-over`
       this._buffer.push(rect)
     }
 
     _draw_flash(i) {
-      const y    = this.layout.lane.target_line[5]
+      const y    = this.layout.lane.target_y
       const rect = [ this.layout.lane.flash[i][4], y, this.layout.lane.flash[i][2], this.layout.lane.flash[i][3] ]
       drawImage(this.rhythmgame.stage[Layer.TEXTEFFECT], this.rhythmgame.sprite, ...this.layout.lane.flash[i], y)
       setTimeout(() => this.rhythmgame.stage[Layer.TEXTEFFECT].clearRect(...rect), 50)
