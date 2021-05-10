@@ -660,13 +660,11 @@
       this.player.time = moment.time + (second - moment.second) * moment.velocity
 
       this.rhythmgame.notechart.lanes.forEach((lane, i) => {
-        while (this.player.time >= lane.at(0).time + lane.at(0).delay_judge * Number(!this.rhythmgame.option.autoplay)) {
-          if (this.player.state_lnjudges[i] !== 0) {
-            this._judgeln(lane, i)
-            break
-          }
+        if (this.player.time >= lane.at(0).time + lane.at(0).delay_judge * Number(!this.rhythmgame.option.autoplay))
           this._judge(lane, i)
-        }
+
+        if (this.player.state_lnjudges[i] !== 0)
+          this._judgeln(lane, i)
       })
 
       if (this.player.time >= this.rhythmgame.notechart.checkpoint.at(0).time) {
