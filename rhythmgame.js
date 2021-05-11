@@ -669,15 +669,15 @@
 
       if (this.player.time >= this.rhythmgame.notechart.checkpoint.at(0).time) {
         this._combocount(this.player.score)
-        if (!this.rhythmgame.option.autoplay)
-          requestAnimationFrame(() => this.rhythmgame.setup(new Result(this.player.score)))
         this.rhythmgame.notechart.checkpoint.shift()
+        if (!this.rhythmgame.option.autoplay)
+          this.rhythmgame.setup(new Result(this.player.score))
       }
     }
 
     _judge(lane, index) {
-      if (this.player.state_lnjudges[index] !== 0) {
-        this._judgeln(lane, index)
+      if (this.rhythmgame.option.autoplay) {
+        this._judgeauto(lane, index)
         return
       }
 
@@ -719,7 +719,7 @@
 
       const time = this.rhythmgame.driver.calc_judgetimeln(lane.at(0), this.player, this.rhythmgame.notechart.timeline.at(0))
       if (time > 0) {
-        requestAnimationFrame(() => this._draw_flash(index))
+        this._draw_flash(index)
         return
       }
 
@@ -728,19 +728,29 @@
       lane.shift()
     }
 
+    _judgeauto(lane, index) {
+      if (lane.at(0).timeln !== 0) {
+        this.player.state_lnjudges[index] = Judge.COOL
+        return
+      }
+
+      this._calculate(Judge.COOL, index)
+      lane.shift()
+    }
+
     _calculate(judge, i) {
       this.player.score.judges[judge]++
       this.player.score.combo++
       this.player.state_judge = judge
-      requestAnimationFrame(() => this._draw_combo())
-      requestAnimationFrame(() => this._draw_flash(i))
+      this._draw_combo()
+      this._draw_flash(i)
     }
 
     _calcreset() {
       this.player.score.judges[Judge.BAD]++
       this._combocount(this.player.score)
       this.player.state_judge = 0
-      requestAnimationFrame(() => this._draw_combo())
+      this._draw_combo()
     }
 
     _combocount(score) {
