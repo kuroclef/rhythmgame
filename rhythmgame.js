@@ -264,7 +264,7 @@
       })
     }
 
-    setup(scene) {
+    move(scene) {
       this.stage.forEach(layer => layer.clearRect(0, 0, layer.canvas.width, layer.canvas.height))
       this.scene = scene
       this.scene.setup(this)
@@ -293,6 +293,263 @@
 
     _onkeyup(event) {
       this.scene.onkeyup(event)
+    }
+
+    setup() {
+      this._layout = JSON.parse(JSON.stringify(this.layout.game[this.option.layout.toLowerCase()]))
+      this.player  = new Player(this.notechart.totalnotes)
+      this._buffer = new Drawbuffer(this.notechart.totalnotes)
+
+      this._layout.lane.target_y = (this.option.reverse) ? this._layout.lane.target_y_r : this._layout.lane.target_y_s
+      this._layout.lane.target.forEach(point => {
+        drawImage(this.stage[Layer.JUDGELINE], this.sprite, ...point, this._layout.lane.target_y)
+      })
+
+      this.sound.currentTime = 0
+      this.sound.volume      = 1
+      this.sound.play()
+      this.sound.addEventListener(`ended`, () => { this.player.gameover = true }, { once : true })
+
+      this.notechart.checkpoint.rewind()
+      this.notechart.timeline.rewind()
+      this.notechart.lanes.forEach(lane => lane.rewind())
+    }
+
+    update(tick) {
+      if (this.player.gameover) {
+        this.sound.pause()
+        if (this.option.autoplay) this.move(new Title())
+      }
+
+      const adjustment = this.option.adjustment * 1000 / 60
+      const second     = (tick - this.player.started_at - adjustment) / 1000
+      const moment     = this.notechart.timeline.forward(second)
+      this.player.time = moment.time + (second - moment.second) * moment.velocity
+
+      this.notechart.lanes.forEach((lane, i) => {
+        if (this.player.time >= lane.at(0).time + lane.at(0).delay_judge * Number(!this.option.autoplay))
+          this._judge(lane, i)
+
+        if (this.player.state_lnjudges[i] !== 0)
+          this._judgeln(lane, i)
+      })
+
+      if (this.player.time >= this.notechart.checkpoint.at(0).time) {
+        this._combocount(this.player.score)
+        this.notechart.checkpoint.shift()
+        if (!this.option.autoplay)
+          this.move(new Result(this.player.score))
+      }
+    }
+
+    _judge(lane, index) {
+      if (this.option.autoplay) {
+        this._judgeauto(lane, index)
+        return
+      }
+
+      const timing_cool  = 0.025
+      const timing_great = 0.050
+      const timing_good  = 0.100
+
+      const time = this.driver.calc_judgetime(lane.at(0), this.player, this.notechart.timeline.at(0))
+      if (time >= timing_good) return
+
+      if (time <= -timing_good) {
+        this._calcreset()
+        lane.shift()
+        return
+      }
+
+      let   judge    = 0
+      const abs_time = Math.abs(time)
+      if (abs_time < timing_cool)  judge = Judge.COOL;  else
+      if (abs_time < timing_great) judge = Judge.GREAT; else
+      if (abs_time < timing_good)  judge = Judge.GOOD;  else return
+
+      if (lane.at(0).timeln !== 0) {
+        this.player.state_lnjudges[index] = judge
+        return
+      }
+
+      this._calculate(judge, index)
+      lane.shift()
+    }
+
+    _judgeln(lane, index) {
+      if (!this.option.autoplay && !this.player.state_inputs[index]) {
+        this._calcreset()
+        this.player.state_lnjudges[index] = 0
+        lane.shift()
+        return
+      }
+
+      const time = this.driver.calc_judgetimeln(lane.at(0), this.player, this.notechart.timeline.at(0))
+      if (time > 0) {
+        this._draw_flash(index)
+        return
+      }
+
+      this._calculate(this.player.state_lnjudges[index], index)
+      this.player.state_lnjudges[index] = 0
+      lane.shift()
+    }
+
+    _judgeauto(lane, index) {
+      if (lane.at(0).timeln !== 0) {
+        this.player.state_lnjudges[index] = Judge.COOL
+        return
+      }
+
+      this._calculate(Judge.COOL, index)
+      lane.shift()
+    }
+
+    _calculate(judge, i) {
+      this.player.score.judges[judge]++
+      this.player.score.combo++
+      this.player.state_judge = judge
+      this._draw_combo()
+      this._draw_flash(i)
+    }
+
+    _calcreset() {
+      this.player.score.judges[Judge.BAD]++
+      this._combocount(this.player.score)
+      this.player.state_judge = 0
+      this._draw_combo()
+    }
+
+    _combocount(score) {
+      score.maxcombo = Math.max(score.combo, score.maxcombo)
+      score.combo = 0
+    }
+
+    render(tick) {
+      const height   = this._layout.lane.height
+      const target_y = this._layout.lane.target_y
+      this._clear()
+
+      this.notechart.lanes.forEach((lane, i) => {
+        this.stage[Layer.CONTAINER].fillStyle = this._layout.lane.color[i]
+
+        for (let j = 0; j < lane.length; j++) {
+          const note = lane.at(j)
+          if (note.time > this.player.time + note.lifetime) continue
+
+          const _y = Math.trunc(height * this.option.speed * (this.player.time - note.time) / note.lifetime)
+          const  y = (this.option.reverse) ? Math.max(target_y, target_y - _y) : Math.min(target_y, target_y + _y)
+
+          if (note.timeln === 0) {
+            this._draw(y, i)
+            continue
+          }
+
+          const _y2 = Math.trunc(height * this.option.speed * (this.player.time - note.timeln) / note.lifetime)
+          const  y2 = (this.option.reverse) ? Math.max(target_y, target_y - _y2) : Math.min(target_y, target_y + _y2)
+
+          this._draw_bar(y, y2, i)
+          this._draw(y,  i)
+          this._draw(y2, i)
+        }
+      })
+    }
+
+    _draw(y, i) {
+      const rect = [ this._layout.lane.note[i][4], y, this._layout.lane.note[i][2], this._layout.lane.note[i][3] ]
+      drawImage(this.stage[Layer.CONTAINER], this.sprite, ...this._layout.lane.note[i], y)
+      this.stage[Layer.CONTAINER].globalCompositeOperation = `source-atop`
+      this.stage[Layer.CONTAINER].fillRect(...rect)
+      this.stage[Layer.CONTAINER].globalCompositeOperation = `source-over`
+      this._buffer.push(rect)
+    }
+
+    _draw(y, i) {
+      const rect = [ this._layout.lane.note[i][4], y, this._layout.lane.note[i][2], this._layout.lane.note[i][3] ]
+      drawImage(this.stage[Layer.CONTAINER], this.sprite, ...this._layout.lane.note[i], y)
+      this.stage[Layer.CONTAINER].globalCompositeOperation = `source-atop`
+      this.stage[Layer.CONTAINER].fillRect(...rect)
+      this.stage[Layer.CONTAINER].globalCompositeOperation = `source-over`
+      this._buffer.push(rect)
+    }
+
+    _draw_bar(y1, y2, i) {
+      const _y2  = y2 + this._layout.lane.note_alpha[i][3] / 2
+      const rect = [ this._layout.lane.note_alpha[i][4], _y2, this._layout.lane.note_alpha[i][2], y1 - y2]
+      this.stage[Layer.CONTAINER].drawImage(this.sprite, ...this._layout.lane.bar[i], _y2, this._layout.lane.bar[i][2], y1 - y2)
+      this.stage[Layer.CONTAINER].globalCompositeOperation = `source-atop`
+      this.stage[Layer.CONTAINER].fillRect(...rect)
+      this.stage[Layer.CONTAINER].globalCompositeOperation = `destination-out`
+      drawImage(this.stage[Layer.CONTAINER], this.sprite, ...this._layout.lane.note_alpha[i], y1)
+      drawImage(this.stage[Layer.CONTAINER], this.sprite, ...this._layout.lane.note_alpha[i], y2)
+      this.stage[Layer.CONTAINER].globalCompositeOperation = `source-over`
+      this._buffer.push(rect)
+    }
+
+    _draw_flash(i) {
+      const y    = this._layout.lane.target_y
+      const rect = [ this._layout.lane.flash[i][4], y, this._layout.lane.flash[i][2], this._layout.lane.flash[i][3] ]
+      drawImage(this.stage[Layer.TEXTEFFECT], this.sprite, ...this._layout.lane.flash[i], y)
+      setTimeout(() => this.stage[Layer.TEXTEFFECT].clearRect(...rect), 50)
+    }
+
+    _clear() {
+      for (let i = 0; i < this._buffer.length; i++) {
+        this.stage[Layer.CONTAINER].clearRect(...this._buffer.at(i))
+      }
+      this._buffer.clear()
+    }
+
+    _draw_combo() {
+      this.stage[Layer.TEXTEFFECT].fillStyle = this._layout.judge.color[this.player.state_judge]
+      this.stage[Layer.TEXTEFFECT].clearRect(0, this.stage[Layer.TEXTEFFECT].canvas.height / 2 - 30, this.stage[Layer.TEXTEFFECT].canvas.width, 60)
+
+      if (this.player.state_judge === 0) return
+      this.stage[Layer.TEXTEFFECT].fillText(this.player.score.combo, this.stage[Layer.TEXTEFFECT].canvas.width / 2, this.stage[Layer.TEXTEFFECT].canvas.height / 2)
+    }
+
+    onkeydown(event) {
+      const speed = this.option.speed
+      switch (event.key) {
+        case `Tab`:
+          event.preventDefault()
+          this.option.speed = Math.min(speed + 0.25, 5.00)
+          return
+
+        case `Shift`:
+          event.preventDefault()
+          this.option.speed = Math.max(speed - 0.25, 1.00)
+          return
+
+        case `Backspace`:
+          event.preventDefault()
+          this.move(new Game())
+          return
+
+        case `Delete`:
+          event.preventDefault()
+          this.sound.pause()
+          this.move(new Title())
+          return
+      }
+
+      if (this.option.autoplay) return
+
+      this.option.keybinds.forEach((key, i) => {
+        if (event.key !== key) return
+        event.preventDefault()
+        this.player.state_inputs[i] = true
+        this._judge(this.notechart.lanes[i], i)
+      })
+    }
+
+    onkeyup(event) {
+      if (this.option.autoplay) return
+      this.option.keybinds.forEach((key, i) => {
+        if (event.key !== key) return
+        event.preventDefault()
+        this.player.state_inputs[i] = false
+      })
     }
   }
 
@@ -533,7 +790,7 @@
       switch (event.key) {
         case `Enter`:
           event.preventDefault()
-          this.rhythmgame.setup(new Option())
+          this.rhythmgame.move(new Option())
           return
       }
     }
@@ -568,56 +825,56 @@
         case `ArrowRight`:
           event.preventDefault()
           this.rhythmgame.option.speed = Math.min(speed + 0.25, 5.00)
-          this.rhythmgame.setup(new Option())
+          this.rhythmgame.move(new Option())
           return
 
         case `Shift`:
         case `ArrowLeft`:
           event.preventDefault()
           this.rhythmgame.option.speed = Math.max(speed - 0.25, 1.00)
-          this.rhythmgame.setup(new Option())
+          this.rhythmgame.move(new Option())
           return
 
         case `ArrowUp`:
           event.preventDefault()
           this.rhythmgame.option.reverse = true
-          this.rhythmgame.setup(new Option())
+          this.rhythmgame.move(new Option())
           return
 
         case `ArrowDown`:
           event.preventDefault()
           this.rhythmgame.option.reverse = false
-          this.rhythmgame.setup(new Option())
+          this.rhythmgame.move(new Option())
           return
 
         case `=`:
         case `;`:
           event.preventDefault()
           this.rhythmgame.option.adjustment++
-          this.rhythmgame.setup(new Option())
+          this.rhythmgame.move(new Option())
           return
 
         case `-`:
           event.preventDefault()
           this.rhythmgame.option.adjustment--
-          this.rhythmgame.setup(new Option())
+          this.rhythmgame.move(new Option())
           return
 
         case `0`:
           event.preventDefault()
           this.rhythmgame.option.adjustment = 0
-          this.rhythmgame.setup(new Option())
+          this.rhythmgame.move(new Option())
           return
 
         case `a`:
           event.preventDefault()
           this.rhythmgame.option.autoplay ^= 1
-          this.rhythmgame.setup(new Option())
+          this.rhythmgame.move(new Option())
           return
 
         case `Enter`:
           event.preventDefault()
-          this.rhythmgame.setup(new Game())
+          this.rhythmgame.move(new Game())
           return
       }
     }
@@ -629,260 +886,23 @@
   class Game extends Scene {
     setup(rhythmgame) {
       this.rhythmgame = rhythmgame
-      this.layout     = JSON.parse(JSON.stringify(rhythmgame.layout[this.constructor.name.toLowerCase()][rhythmgame.option.layout.toLowerCase()]))
-      this.player     = new Player(rhythmgame.notechart.totalnotes)
-      this._buffer    = new Drawbuffer(rhythmgame.notechart.totalnotes)
-
-      this.layout.lane.target_y = (rhythmgame.option.reverse) ? this.layout.lane.target_y_r : this.layout.lane.target_y_s
-      this.layout.lane.target.forEach(point => {
-        drawImage(rhythmgame.stage[Layer.JUDGELINE], rhythmgame.sprite, ...point, this.layout.lane.target_y)
-      })
-
-      rhythmgame.sound.currentTime = 0
-      rhythmgame.sound.volume      = 1
-      rhythmgame.sound.play()
-      rhythmgame.sound.addEventListener(`ended`, () => { this.player.gameover = true }, { once : true })
-
-      rhythmgame.notechart.checkpoint.rewind()
-      rhythmgame.notechart.timeline.rewind()
-      rhythmgame.notechart.lanes.forEach(lane => lane.rewind())
+      this.rhythmgame.setup()
     }
 
     update(tick) {
-      if (this.player.gameover) {
-        this.rhythmgame.sound.pause()
-        if (this.rhythmgame.option.autoplay) this.rhythmgame.setup(new Title())
-      }
-
-      const adjustment = this.rhythmgame.option.adjustment * 1000 / 60
-      const second     = (tick - this.player.started_at - adjustment) / 1000
-      const moment     = this.rhythmgame.notechart.timeline.forward(second)
-      this.player.time = moment.time + (second - moment.second) * moment.velocity
-
-      this.rhythmgame.notechart.lanes.forEach((lane, i) => {
-        if (this.player.time >= lane.at(0).time + lane.at(0).delay_judge * Number(!this.rhythmgame.option.autoplay))
-          this._judge(lane, i)
-
-        if (this.player.state_lnjudges[i] !== 0)
-          this._judgeln(lane, i)
-      })
-
-      if (this.player.time >= this.rhythmgame.notechart.checkpoint.at(0).time) {
-        this._combocount(this.player.score)
-        this.rhythmgame.notechart.checkpoint.shift()
-        if (!this.rhythmgame.option.autoplay)
-          this.rhythmgame.setup(new Result(this.player.score))
-      }
-    }
-
-    _judge(lane, index) {
-      if (this.rhythmgame.option.autoplay) {
-        this._judgeauto(lane, index)
-        return
-      }
-
-      const timing_cool  = 0.025
-      const timing_great = 0.050
-      const timing_good  = 0.100
-
-      const time = this.rhythmgame.driver.calc_judgetime(lane.at(0), this.player, this.rhythmgame.notechart.timeline.at(0))
-      if (time >= timing_good) return
-
-      if (time <= -timing_good) {
-        this._calcreset()
-        lane.shift()
-        return
-      }
-
-      let   judge    = 0
-      const abs_time = Math.abs(time)
-      if (abs_time < timing_cool)  judge = Judge.COOL;  else
-      if (abs_time < timing_great) judge = Judge.GREAT; else
-      if (abs_time < timing_good)  judge = Judge.GOOD;  else return
-
-      if (lane.at(0).timeln !== 0) {
-        this.player.state_lnjudges[index] = judge
-        return
-      }
-
-      this._calculate(judge, index)
-      lane.shift()
-    }
-
-    _judgeln(lane, index) {
-      if (!this.rhythmgame.option.autoplay && !this.player.state_inputs[index]) {
-        this._calcreset()
-        this.player.state_lnjudges[index] = 0
-        lane.shift()
-        return
-      }
-
-      const time = this.rhythmgame.driver.calc_judgetimeln(lane.at(0), this.player, this.rhythmgame.notechart.timeline.at(0))
-      if (time > 0) {
-        this._draw_flash(index)
-        return
-      }
-
-      this._calculate(this.player.state_lnjudges[index], index)
-      this.player.state_lnjudges[index] = 0
-      lane.shift()
-    }
-
-    _judgeauto(lane, index) {
-      if (lane.at(0).timeln !== 0) {
-        this.player.state_lnjudges[index] = Judge.COOL
-        return
-      }
-
-      this._calculate(Judge.COOL, index)
-      lane.shift()
-    }
-
-    _calculate(judge, i) {
-      this.player.score.judges[judge]++
-      this.player.score.combo++
-      this.player.state_judge = judge
-      this._draw_combo()
-      this._draw_flash(i)
-    }
-
-    _calcreset() {
-      this.player.score.judges[Judge.BAD]++
-      this._combocount(this.player.score)
-      this.player.state_judge = 0
-      this._draw_combo()
-    }
-
-    _combocount(score) {
-      score.maxcombo = Math.max(score.combo, score.maxcombo)
-      score.combo = 0
+      this.rhythmgame.update(tick)
     }
 
     render(tick) {
-      const height   = this.layout.lane.height
-      const target_y = this.layout.lane.target_y
-      this._clear()
-
-      this.rhythmgame.notechart.lanes.forEach((lane, i) => {
-        this.rhythmgame.stage[Layer.CONTAINER].fillStyle = this.layout.lane.color[i]
-
-        for (let j = 0; j < lane.length; j++) {
-          const note = lane.at(j)
-          if (note.time > this.player.time + note.lifetime) continue
-
-          const _y = Math.trunc(height * this.rhythmgame.option.speed * (this.player.time - note.time) / note.lifetime)
-          const  y = (this.rhythmgame.option.reverse) ? Math.max(target_y, target_y - _y) : Math.min(target_y, target_y + _y)
-
-          if (note.timeln === 0) {
-            this._draw(y, i)
-            continue
-          }
-
-          const _y2 = Math.trunc(height * this.rhythmgame.option.speed * (this.player.time - note.timeln) / note.lifetime)
-          const  y2 = (this.rhythmgame.option.reverse) ? Math.max(target_y, target_y - _y2) : Math.min(target_y, target_y + _y2)
-
-          this._draw_bar(y, y2, i)
-          this._draw(y,  i)
-          this._draw(y2, i)
-        }
-      })
-    }
-
-    _draw(y, i) {
-      const rect = [ this.layout.lane.note[i][4], y, this.layout.lane.note[i][2], this.layout.lane.note[i][3] ]
-      drawImage(this.rhythmgame.stage[Layer.CONTAINER], this.rhythmgame.sprite, ...this.layout.lane.note[i], y)
-      this.rhythmgame.stage[Layer.CONTAINER].globalCompositeOperation = `source-atop`
-      this.rhythmgame.stage[Layer.CONTAINER].fillRect(...rect)
-      this.rhythmgame.stage[Layer.CONTAINER].globalCompositeOperation = `source-over`
-      this._buffer.push(rect)
-    }
-
-    _draw(y, i) {
-      const rect = [ this.layout.lane.note[i][4], y, this.layout.lane.note[i][2], this.layout.lane.note[i][3] ]
-      drawImage(this.rhythmgame.stage[Layer.CONTAINER], this.rhythmgame.sprite, ...this.layout.lane.note[i], y)
-      this.rhythmgame.stage[Layer.CONTAINER].globalCompositeOperation = `source-atop`
-      this.rhythmgame.stage[Layer.CONTAINER].fillRect(...rect)
-      this.rhythmgame.stage[Layer.CONTAINER].globalCompositeOperation = `source-over`
-      this._buffer.push(rect)
-    }
-
-    _draw_bar(y1, y2, i) {
-      const _y2  = y2 + this.layout.lane.note_alpha[i][3] / 2
-      const rect = [ this.layout.lane.note_alpha[i][4], _y2, this.layout.lane.note_alpha[i][2], y1 - y2]
-      this.rhythmgame.stage[Layer.CONTAINER].drawImage(this.rhythmgame.sprite, ...this.layout.lane.bar[i], _y2, this.layout.lane.bar[i][2], y1 - y2)
-      this.rhythmgame.stage[Layer.CONTAINER].globalCompositeOperation = `source-atop`
-      this.rhythmgame.stage[Layer.CONTAINER].fillRect(...rect)
-      this.rhythmgame.stage[Layer.CONTAINER].globalCompositeOperation = `destination-out`
-      drawImage(this.rhythmgame.stage[Layer.CONTAINER], this.rhythmgame.sprite, ...this.layout.lane.note_alpha[i], y1)
-      drawImage(this.rhythmgame.stage[Layer.CONTAINER], this.rhythmgame.sprite, ...this.layout.lane.note_alpha[i], y2)
-      this.rhythmgame.stage[Layer.CONTAINER].globalCompositeOperation = `source-over`
-      this._buffer.push(rect)
-    }
-
-    _draw_flash(i) {
-      const y    = this.layout.lane.target_y
-      const rect = [ this.layout.lane.flash[i][4], y, this.layout.lane.flash[i][2], this.layout.lane.flash[i][3] ]
-      drawImage(this.rhythmgame.stage[Layer.TEXTEFFECT], this.rhythmgame.sprite, ...this.layout.lane.flash[i], y)
-      setTimeout(() => this.rhythmgame.stage[Layer.TEXTEFFECT].clearRect(...rect), 50)
-    }
-
-    _clear() {
-      for (let i = 0; i < this._buffer.length; i++) {
-        this.rhythmgame.stage[Layer.CONTAINER].clearRect(...this._buffer.at(i))
-      }
-      this._buffer.clear()
-    }
-
-    _draw_combo() {
-      this.rhythmgame.stage[Layer.TEXTEFFECT].fillStyle = this.layout.judge.color[this.player.state_judge]
-      this.rhythmgame.stage[Layer.TEXTEFFECT].clearRect(0, this.rhythmgame.stage[Layer.TEXTEFFECT].canvas.height / 2 - 30, this.rhythmgame.stage[Layer.TEXTEFFECT].canvas.width, 60)
-
-      if (this.player.state_judge === 0) return
-      this.rhythmgame.stage[Layer.TEXTEFFECT].fillText(this.player.score.combo, this.rhythmgame.stage[Layer.TEXTEFFECT].canvas.width / 2, this.rhythmgame.stage[Layer.TEXTEFFECT].canvas.height / 2)
+      this.rhythmgame.render(tick)
     }
 
     onkeydown(event) {
-      const speed = this.rhythmgame.option.speed
-      switch (event.key) {
-        case `Tab`:
-          event.preventDefault()
-          this.rhythmgame.option.speed = Math.min(speed + 0.25, 5.00)
-          return
-
-        case `Shift`:
-          event.preventDefault()
-          this.rhythmgame.option.speed = Math.max(speed - 0.25, 1.00)
-          return
-
-        case `Backspace`:
-          event.preventDefault()
-          this.rhythmgame.setup(new Game())
-          return
-
-        case `Delete`:
-          event.preventDefault()
-          this.rhythmgame.sound.pause()
-          this.rhythmgame.setup(new Title())
-          return
-      }
-
-      if (this.rhythmgame.option.autoplay) return
-
-      this.rhythmgame.option.keybinds.forEach((key, i) => {
-        if (event.key !== key) return
-        event.preventDefault()
-        this.player.state_inputs[i] = true
-        this._judge(this.rhythmgame.notechart.lanes[i], i)
-      })
+      this.rhythmgame.onkeydown(event)
     }
 
     onkeyup(event) {
-      if (this.rhythmgame.option.autoplay) return
-      this.rhythmgame.option.keybinds.forEach((key, i) => {
-        if (event.key !== key) return
-        event.preventDefault()
-        this.player.state_inputs[i] = false
-      })
+      this.rhythmgame.onkeyup(event)
     }
   }
 
@@ -910,12 +930,12 @@
       switch (event.key) {
         case `Backspace`:
           event.preventDefault()
-          this.rhythmgame.setup(new Game())
+          this.rhythmgame.move(new Game())
           return
 
         case `Enter`:
           event.preventDefault()
-          this.rhythmgame.setup(new Title())
+          this.rhythmgame.move(new Title())
           return
       }
     }
@@ -925,7 +945,7 @@
     const rhythmgame = new Rhythmgame()
     await rhythmgame.load()
           rhythmgame.build()
-          rhythmgame.setup(new Title())
+          rhythmgame.move(new Title())
           rhythmgame.start()
   })()
 
