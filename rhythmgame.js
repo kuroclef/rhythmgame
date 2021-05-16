@@ -343,6 +343,11 @@
     }
 
     _judge(lane, index) {
+      if (this.player.state_lnjudges[index] !== 0) {
+        this._judgeln(lane, index)
+        return
+      }
+
       if (this.option.autoplay) {
         this._judgeauto(lane, index)
         return
